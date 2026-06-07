@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URLリンクリンカーくん (職業別タブ・単一入力版)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- 基本リセット & 共通設定 --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        body {
+            background-color: #f8f9fa;
+            color: #212529;
+            /* ★ 修正：下部に固定ナビ(60px)＋コピーライト(30px)＋余白分を考慮したパディングを設定 */
+            padding: 24px 16px 120px 16px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* --- 広告バナースペース (画面いっぱいに広げる設定) --- */
+        .main-ad-area {
+            width: 100vw;          /* 画面の横幅いっぱいに指定 */
+            margin-left: calc(-50vw + 50%); /* bodyのpaddingを打ち消して左右端まで届かせる */
+            margin-right: calc(-50vw + 50%);
+            margin-bottom: 24px;
+            text-align: center;
+            overflow: hidden;
+        }
+        /* 最下部バナー用の余白調整 */
+        .main-ad-area.bottom-ad {
+            margin-top: 40px;
+            margin-bottom: 0;
+        }
+        
+        .ad-placeholder {
+            display: block;
+            width: 100%;
+            min-height: auto;
+            background-color: #ffffff;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        /* バナー画像そのもののスタイル */
+        .ad-image {
+            width: 100%;
+            height: auto;
+            max-height: 200px;     /* 横に広げた分、潰れないように最大高さを制限 */
+            object-fit: cover;     /* 領域に合わせて切り抜く設定 */
+            display: block;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* --- 職業切り替えタブ (10個対応・横スクロール) --- */
+        .tab-container {
+            display: flex;
+            gap: 4px;
+            margin-bottom: -1px;
+            overflow-x: auto; /* 10個が収まらない場合に横スクロールさせる */
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch; /* スマホでのスクロールを滑らかに */
+            padding-bottom: 4px; /* スクロールバーとの被り防止 */
+        }
+        /* スクロールバーのデザインを少しスタイリッシュに */
+        .tab-container::-webkit-scrollbar {
+            height: 5px;
+        }
+        .tab-container::-webkit-scrollbar-thumb {
+            background: #dee2e6;
+            border-radius: 4px;
+        }
+        .tab-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .tab-btn {
+            background-color: #e9ecef;
+            color: #495057;
+            border: 1px solid #dee2e6;
+            border-bottom: none;
+            padding: 10px 16px;
+            border-radius: 8px 8px 0 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0; /* タブが潰れないように固定 */
+        }
+        .tab-btn:hover {
+            background-color: #dee2e6;
+        }
+        .tab-btn.active {
+            background-color: #fff;
+            color: #228be6;
+            border-color: #dee2e6;
+            border-bottom: 1px solid #fff;
+            padding-bottom: 11px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- 入力セクション --- */
+        .input-section {
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 0 8px 8px 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .sub-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .input-desc {
+            font-size: 0.8rem;
+            color: #868e96;
+            margin-bottom: 14px;
+            line-height: 1.4;
+        }
+        .url-input {
+            width: 100%;
+            max-width: 650px;
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin-bottom: 14px;
+            line-height: 1.5;
+            display: block;
+        }
+        .url-input:focus {
+            outline: none;
+            border-color: #228be6;
+            box-shadow: 0 0 0 3px rgba(34, 139, 230, 0.15);
+        }
+
+        /* ★ 新設：禁止ワード警告メッセージ用のスタイル */
+        .error-message {
+            color: #fa5252;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: -6px;
+            margin-bottom: 14px;
+            display: none; /* 初期状態は非表示 */
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            background-color: #228be6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn:hover { background-color: #1c7ed6; }
+        .btn-danger { background-color: #fa5252; }
+        .btn-danger:hover { background-color: #e03131; }
+
+        /* --- 縦10列のリンクレイアウト --- */
+        .output-section {
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .count-badge {
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .links-list {
+            display: flex;
+            flex-direction: column;
+            min-height: 440px;
+        }
+        .link-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 8px;
+            border-bottom: 1px solid #f1f3f5;
+        }
+        .link-row:last-child { border-bottom: none; }
+        
+        .link-num {
+            font-size: 0.85rem;
+            color: #adb5bd;
+            width: 40px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* ★ 上下2行表示にするためのコンテナ */
+        .link-content-box {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        /* 上部：名前（タイトル） */
+        .link-title {
+            color: #12b886;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+        .link-title:hover { text-decoration: underline; }
+        
+        /* 下部：URL */
+        .link-url-sub {
+            font-size: 0.8rem;
+            color: #868e96;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+        
+        /* ステータスバッジ類 */
+        .badge-container {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+        .time-badge {
+            font-size: 0.75rem;
+            color: #868e96;
+            background-color: #f1f3f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-variant-numeric: tabular-nums;
+        }
+        .click-badge {
+            font-size: 0.75rem;
+            color: #228be6;
+            background-color: #e7f5ff;
+            border: 1px solid #a5d8ff;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            transition: all 0.1s ease;
+        }
+        .click-badge.bump {
+            transform: scale(1.1);
+            background-color: #3b5bdb;
+            color: white;
+        }
+
+        .empty-state {
+            color: #868e96;
+            text-align: center;
+            padding: 60px 0;
+            font-size: 0.9rem;
+        }
+
+        /* --- ページネーション --- */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-top: 20px;
+            padding-top: 12px;
+            border-top: 1px solid #dee2e6;
+        }
+        .btn-page {
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            color: #495057;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        .btn-page:disabled {
+            color: #dee2e6;
+            border-color: #e9ecef;
+            cursor: not-allowed;
+        }
+        .page-indicator {
+            font-size: 0.85rem;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        /* ==========================================
+        画面最下部：固定フッターナビゲーション
+        ========================================== */
+        .bottom-nav {
+            display: flex;
+            position: fixed;
+            bottom: 30px; /* コピーライト（高さ30px）の上に固定配置 */
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: #ffffff;
+            border-top: 1px solid #eff3f4;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 80;
+        }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #536471;
+            font-size: 9px;
+            cursor: pointer;
+            flex: 1;
+            padding: 5px 0;
+            text-decoration: none;
+        }
+        .bottom-nav-item i {
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
+        .bottom-nav-item.active {
+            color: #0f1419;
+        }
+
+        /* 新設：最下部固定コピーライト表示 */
+        .footer-copyright {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            background-color: #f7f9f9;
+            color: #536471;
+            font-size: 11px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top: 1px solid #eff3f4;
+            z-index: 80;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-ad-area">
+        <div class="ad-placeholder">
+            <a href="https://nitro-groserin.github.io/Yakuza-Slayer/" target="_blank" rel="noopener noreferrer" style="display: block; text-decoration: none; width: 100%; height: 100%;">
+                <img src="img-box\無題155_20250329132501.png" alt="MAIN" class="ad-image">
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>🔗 URL Link Linker<span id="currentJobTitle" style="font-size:0.95rem; color:#228be6; background-color:#e7f5ff; padding:2px 8px; border-radius:4px; font-weight:bold;">無料で使えるリンクリンカー</span> <span style="font-size:0.8rem; color:#868e96; font-weight:normal;">張り付けたリンクは、1タップ・1クリック毎に1カウント連動します</span></h1>
+
+        <div class="tab-container">
+            <button class="tab-btn active" data-job="sales" onclick="switchJob('sales')">💼 総合</button>
+            <button class="tab-btn" data-job="dev" onclick="switchJob('dev')">💻 ゲーム・本・音楽</button>
+            <button class="tab-btn" data-job="hr" onclick="switchJob('hr')">👥 飲食</button>
+            <button class="tab-btn" data-job="ga" onclick="switchJob('ga')">📄 職人・現場・製造</button>
+            <button class="tab-btn" data-job="design" onclick="switchJob('design')">🎨 美容・アパレル</button>
+            <button class="tab-btn" data-job="marketing" onclick="switchJob('marketing')">医療・介護</button>
+            <button class="tab-btn" data-job="support" onclick="switchJob('support')">📞 配送・配達・ドライバー</button>
+            <button class="tab-btn" data-job="legal" onclick="switchJob('legal')">⚖️ あ</button>
+            <button class="tab-btn" data-job="planning" onclick="switchJob('planning')">🚀 その他</button>
+        </div>
+
+        <div class="input-section">
+            <div class="input-desc">①と②の項目は、両方入力してください。</div>
+            
+            <label class="sub-label" for="titleInput">① リンクのタイトル（表示名）</label>
+            <input type="text" id="titleInput" class="url-input" placeholder="例：Googleのトップページ" oninput="validateInput()">
+            
+            <label class="sub-label" for="urlInput">② 追加するURL</label>
+            <input type="url" id="urlInput" class="url-input" placeholder="例：https://google.com" oninput="validateInput()">
+            
+            <!-- ★ 新設：エラーメッセージ表示用の領域 -->
+            <div id="bannedError" class="error-message"></div>
+
+            <div class="btn-group">
+                <button class="btn" onclick="addLinks()">リンクを追加</button>
+                <button class="btn btn-danger" onclick="clearAll()">このタブの全削除</button>
+            </div>
+        </div>
+
+        <div class="output-section">
+            <div class="output-header">
+                <span class="label" style="font-size: 0.9rem; font-weight: 600; color: #495057; margin: 0;">有効なリンク（最大10列ずつ表示）</span>
+                <span id="totalCount" class="count-badge">0 件</span>
+            </div>
+
+            <div id="linksList" class="links-list">
+                <div class="empty-state">URLを追加してください。</div>
+            </div>
+
+            <div id="pagination" class="pagination-container" style="display: none;">
+                <button id="prevBtn" class="btn-page" onclick="changePage(-1)">前へ</button>
+                <span id="pageIndicator" class="page-indicator">1 / 1</span>
+                <button id="nextBtn" class="btn-page" onclick="changePage(1)">次へ</button>
+            </div>
+        </div>
+    </div>
+
+   
+
+
+    <nav class="bottom-nav" id="bottomNav">
+        <a href="ニューワールド.html" class="bottom-nav-item active" id="btnHome" onclick="switchMainTab('timeline'); return false;">
+            <i class="fa-solid fa-house"></i>
+            <span>ホーム</span>
+        </a>
+        <a href="リンクリンカー.html" class="bottom-nav-item" id="btnSearch">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>無料</span>
+        </a>
+        <a href="ライブ.html" class="bottom-nav-item" id="btnVideo" onclick="switchMainTab('video'); return false;">
+            <i class="fa-solid fa-video"></i>
+            <span>ライブ</span>
+        </a>
+        <a href="EC.html" class="bottom-nav-item" id="btnLive">
+            <i class="fa-regular fa-bell"></i>
+            <span>ショップ</span>
+        </a>
+        <a href="企業.html" class="bottom-nav-item" id="btnCompany">
+            <i class="fa-solid fa-shop"></i>
+            <span>企業</span>
+        </a>
+        <a href="通知とDM.html" class="bottom-nav-item" id="btnDM">
+            <i class="fa-regular fa-envelope"></i>
+            <span>通知とDM</span>
+        </a>
+    </nav>
+
+    <footer class="footer-copyright">
+        &copy; 2026 URLリンクリンカーくん. All Rights Reserved.
+    </footer>
+
+
+
+
+    <script>
+    // 1. オーディオ要素を作成し、ループ設定を有効にする
+    const audio = new Audio('sound-box/BGM - 149 - Reincarnation @ フリーBGM DOVA-SYNDROME OFFICIAL YouTube CHANNEL.mp3');
+    audio.loop = true; // ループ再生をON
+    audio.preload = 'auto';
+    
+
+
+
+    // 2. 画面を一度クリックしたら再生を開始（1回クリックされたらイベントは自動消滅）
+    window.addEventListener('click', () => {
+    audio.play()
+        .then(() => console.log("ループ再生を開始しました。"))
+        .catch(err => console.error("再生に失敗しました:", err));
+}, { once: true });
+
+
+
+
+
+        // --- 職業別データ管理 (10職種分に対応) ---
+        let allJobsData = {
+            sales: [],
+            dev: [],
+            hr: [],
+            ga: [],
+            design: [],
+            marketing: [],
+            support: [],
+            accounting: [],
+            legal: [],
+            planning: []
+        };
+        
+        let currentJob = 'sales';
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        const EXPIRE_TIME = 12 * 60 * 60 * 1000; // 12時間
+        
+        // ★ 最優先（トップ固定）にするURLの定義
+        const PRIORITY_URL = "https://nitro-groserin.github.io/Yakuza-Slayer/";
+
+        // ★ 入力禁止ワード（NGワード）のリスト
+        // 必要に応じて引用符内にカンマ区切りで禁止にしたい言葉を追記してください。
+        const BANNED_WORDS = ["https://2ch.sc/",
+        "",
+        "",
+    ];
+
+        window.onload = function() {
+            const savedData = localStorage.getItem('timed_urls_v6_sep');
+            if (savedData) {
+                const parsed = JSON.parse(savedData);
+                allJobsData = { ...allJobsData, ...parsed };
+            }
+            checkAndRender(true); 
+            setInterval(() => checkAndRender(false), 1000);
+        };
+
+        function switchJob(jobKey) {
+            if (currentJob === jobKey) return;
+            
+            currentJob = jobKey;
+            currentPage = 1;
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                if (btn.getAttribute('data-job') === jobKey) {
+                    btn.classList.add('active');
+                    document.getElementById('currentJobTitle').textContent = btn.textContent.replace(/[^\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF]/g, '').trim();
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            document.getElementById('titleInput').value = '';
+            document.getElementById('urlInput').value = '';
+            document.getElementById('bannedError').style.display = 'none'; // エラー消去
+            checkAndRender(true);
+        }
+
+        function getCurrentListData() {
+            return allJobsData[currentJob] || [];
+        }
+
+        function setCurrentListData(newData) {
+            allJobsData[currentJob] = newData;
+        }
+
+        // ★ 配列内の最優先URLを先頭（インデックス0）に移動させる共通関数
+        function sortPriorityToTop(list) {
+            const index = list.findIndex(item => item.url === PRIORITY_URL);
+            if (index > 0) {
+                const [priorityItem] = list.splice(index, 1);
+                list.unshift(priorityItem); // 先頭に追加
+            }
+            return list;
+        }
+
+        // ★ 新設：入力内容をリアルタイムで監視・判定する共通関数
+        function validateInput() {
+            const title = document.getElementById('titleInput').value.trim();
+            const url = document.getElementById('urlInput').value.trim();
+            const errorEl = document.getElementById('bannedError');
+
+            const foundBannedWord = BANNED_WORDS.find(word => title.includes(word) || url.includes(word));
+            
+            if (foundBannedWord) {
+                errorEl.textContent = `⚠️ 入力に禁止ワード（${foundBannedWord}）が含まれているため登録できません。`;
+                errorEl.style.display = 'block';
+                return false;
+            } else {
+                errorEl.style.display = 'none';
+                return true;
+            }
+        }
+
+        function addLinks() {
+            const title = document.getElementById('titleInput').value.trim();
+            const url = document.getElementById('urlInput').value.trim();
+
+            if (title.length === 0 || url.length === 0) {
+                alert('タイトルとURLは必ず両方入力してください。');
+                return;
+            }
+
+            // ★ 追加ボタンが押された際にも禁止ワードを再検証してブロック
+            if (!validateInput()) {
+                return;
+            }
+
+            const now = Date.now();
+            let currentList = getCurrentListData();
+
+            const isDuplicate = currentList.some(item => item.url === url);
+            
+            if (isDuplicate) {
+                alert(`URL「${url}」は既にこのタブに登録されています。`);
+                return;
+            }
+
+            currentList.push({
+                id: '_' + Math.random().toString(36).substr(2, 9),
+                url: url,
+                title: title,
+                expiry: now + EXPIRE_TIME,
+                clicks: 0
+            });
+
+            document.getElementById('titleInput').value = '';
+            document.getElementById('urlInput').value = '';
+            
+            // ★ 新しく追加した際、最優先URLがあれば先頭にソート
+            currentList = sortPriorityToTop(currentList);
+            
+            setCurrentListData(currentList);
+            saveData();
+            currentPage = 1;
+            checkAndRender(true); 
+        }
+
+        function registerClick(id) {
+            let currentList = getCurrentListData();
+            const target = currentList.find(item => item.id === id);
+            if (target) {
+                target.clicks++;
+                saveData();
+                
+                const badge = document.getElementById(`badge-${id}`);
+                if (badge) {
+                    badge.textContent = `📈 ${target.clicks} click`;
+                    badge.classList.add('bump');
+                    setTimeout(() => badge.classList.remove('bump'), 150);
+                }
+            }
+        }
+
+        function checkAndRender(forceRender = false) {
+            const now = Date.now();
+            let currentList = getCurrentListData();
+            const originalLength = currentList.length;
+
+            currentList = currentList.filter(item => item.expiry > now);
+            
+            // ★ タイマー監視・クリーンアップ時にも、最優先URLを常にトップにキープ
+            currentList = sortPriorityToTop(currentList);
+            
+            setCurrentListData(currentList);
+
+            let needsFullRender = forceRender;
+
+            if (currentList.length !== originalLength) {
+                saveData();
+                const maxPage = Math.ceil(currentList.length / itemsPerPage) || 1;
+                if (currentPage > maxPage) currentPage = maxPage;
+                needsFullRender = true;
+            }
+
+            if (needsFullRender) {
+                render();
+            } else {
+                renderTimersOnly();
+            }
+        }
+
+        function render() {
+            const listContainer = document.getElementById('linksList');
+            const paginationWrapper = document.getElementById('pagination');
+            const totalCountBadge = document.getElementById('totalCount');
+            
+            let currentList = getCurrentListData();
+            totalCountBadge.textContent = `${currentList.length} 件`;
+
+            if (currentList.length === 0) {
+                listContainer.innerHTML = '<div class="empty-state">URLを追加してください。</div>';
+                paginationWrapper.style.display = 'none';
+                return;
+            }
+
+            const totalPages = Math.ceil(currentList.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentItems = currentList.slice(startIndex, endIndex);
+
+            let html = '';
+            currentItems.forEach((item, index) => {
+                const globalNumber = startIndex + index + 1;
+                const displayTitle = item.title || item.url;
+
+                html += `
+                    <div class="link-row">
+                        <div class="link-num">${globalNumber}.</div>
+                        <div class="link-content-box">
+                            <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="link-title" 
+                               title="${item.url}"
+                               onmousedown="registerClick('${item.id}')" 
+                               ontouchstart="registerClick('${item.id}')">${displayTitle}</a>
+                            <span class="link-url-sub">${item.url}</span>
+                        </div>
+                        <div class="badge-container">
+                            <span id="badge-${item.id}" class="click-badge">📈 ${item.clicks} click</span>
+                            <span id="timer-${item.id}" class="time-badge">⏳ --h --m --s</span>
+                        </div>
+                    </div>
+                `;
+            });
+            listContainer.innerHTML = html;
+
+            paginationWrapper.style.display = 'flex';
+            document.getElementById('pageIndicator').textContent = `${currentPage} / ${totalPages}`;
+            document.getElementById('prevBtn').disabled = (currentPage === 1);
+            document.getElementById('nextBtn').disabled = (totalPages === 0 || currentPage === totalPages);
+            
+            renderTimersOnly();
+        }
+
+        function renderTimersOnly() {
+            const now = Date.now();
+            let currentList = getCurrentListData();
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentItems = currentList.slice(startIndex, endIndex);
+
+            if (currentItems.length > 0 && !document.getElementById(`timer-${currentItems[0].id}`)) {
+                render();
+                return;
+            }
+
+            currentItems.forEach(item => {
+                const timerEl = document.getElementById(`timer-${item.id}`);
+                if (timerEl) {
+                    const timeLeft = item.expiry - now;
+                    if (timeLeft > 0) {
+                        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                        timerEl.textContent = `⏳ ${hours}h ${minutes}m ${seconds}s`;
+                    } else {
+                        timerEl.textContent = `⏳ 0h 0m 0s`;
+                    }
+                }
+            });
+        }
+
+        function changePage(direction) {
+            currentPage += direction;
+            render();
+        }
+
+        function saveData() {
+            localStorage.setItem('timed_urls_v6_sep', JSON.stringify(allJobsData));
+        }
+
+        function clearAll() {
+            const tabName = document.getElementById('currentJobTitle').textContent;
+            if (confirm(`【${tabName}】のすべてのリンクを削除しますか？\n（他のタブのデータは削除されません）`)) {
+                setCurrentListData([]);
+                saveData();
+                checkAndRender(true);
+            }
+        }
+    </script>
+</body>
+</html>
