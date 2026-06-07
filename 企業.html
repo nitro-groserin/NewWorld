@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New World掲載企業一覧</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            /* 変更：上40px、左右20px、下130px（固定ナビ+フッターの高さ分の余白を確保） */
+            padding: 40px 20px 130px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 全体のコンテンツ幅を統一するための共通クラス */
+        .wrapper {
+            width: 100%;
+            max-width: 600px; /* リストコンテナと幅を合わせる */
+        }
+
+        /* ーーー 追加：メインバナースペース ーーー */
+        .main-banner-space {
+            width: 100%;
+            height: 150px; /* 好みに合わせて高さを調整してください */
+            background-color: #e2e8f0;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            overflow: hidden;
+            transition: all 0.2s;
+            margin-bottom: 20px; /* リストコンテナとの間隔 */
+        }
+
+        .main-banner-space:hover {
+            border-color: #4f46e5;
+            background-color: #f1f5f9;
+            color: #4f46e5;
+        }
+
+        .main-banner-space img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 10列並ぶコンテナ */
+        .list-container {
+            width: 100%;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+
+        /* 各行のスタイル */
+        .list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 10px;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        /* 左端：クリックカウント（表示用バッジ） */
+        .count-badge {
+            background-color: #e0e7ff;
+            color: #4f46e5;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            min-width: 110px;
+            text-align: center;
+            user-select: none;
+        }
+
+        /* 右端：画像リンクスペース（width 400px / margin-right 0px に変更） */
+        .img-link-space {
+            width: 400px;
+            height: 55px;
+            background-color: #e2e8f0;
+            border: 2px dashed #cbd5e1;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-decoration: none;
+            overflow: hidden;
+            transition: all 0.2s;
+            margin-right: 0px; 
+        }
+
+        .img-link-space:hover {
+            border-color: #4f46e5;
+            background-color: #f1f5f9;
+            color: #4f46e5;
+        }
+
+        .img-link-space img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 下部：ページネーション */
+        .pagination {
+            display: flex;
+            gap: 8px;
+            list-style: none;
+            /* 変更：ページネーション自体の下部にマージンを持たせ、固定バーとの距離を保つ */
+            margin-bottom: 20px;
+        }
+
+        .page-item {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #cbd5e1;
+            background-color: white;
+            border-radius: 6px;
+            color: #4a5568;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-item:hover {
+            border-color: #4f46e5;
+            color: #4f46e5;
+            background-color: #eeebff;
+        }
+
+        .page-item.active {
+            background-color: #4f46e5;
+            border-color: #4f46e5;
+            color: white;
+        }
+        /* ==========================================
+            画面最下部：固定フッターナビゲーション
+           ========================================== */
+        .bottom-nav {
+            display: flex;
+            position: fixed;
+            bottom: 30px; /* コピーライト（高さ30px）の上に固定配置 */
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: #ffffff;
+            border-top: 1px solid #eff3f4;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 80;
+        }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #536471;
+            font-size: 9px;
+            cursor: pointer;
+            flex: 1;
+            padding: 5px 0;
+            text-decoration: none;
+        }
+        .bottom-nav-item i {
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
+        .bottom-nav-item.active {
+            color: #0f1419;
+        }
+
+        /* 新設：最下部固定コピーライト表示 */
+        .footer-copyright {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            background-color: #f7f9f9;
+            color: #536471;
+            font-size: 11px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top: 1px solid #eff3f4;
+            z-index: 80;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="click-sound" src="sound-box/PC-Mouse02-01(L).mp3" preload="auto"></audio>
+
+    <div class="wrapper">
+
+        <a href="https://nitro-groserin.github.io/Yakuza-Slayer/" target="_blank" class="main-banner-space">
+            <img src="img-box/無題155_20250329132501.png" alt="メインバナー">
+        </a>
+
+
+        <div class="list-container">
+            <div class="list-item">
+                <div class="count-badge">Click: <span class="count">0</span></div>
+                <a href="#" target="_blank" class="img-link-space" onclick="countUp(this)">imgリンク <span class="link-text">1</span></a>
+            </div>
+            <div class="list-item">
+                <div class="count-badge">Click: <span class="count">0</span></div>
+                <a href="#" target="_blank" class="img-link-space" onclick="countUp(this)">imgリンク <span class="link-text">2</span></a>
+            </div>
+            <div class="list-item">
+                <div class="count-badge">Click: <span class="count">0</span></div>
+                <a href="#" target="_blank" class="img-link-space" onclick="countUp(this)">imgリンク <span class="link-text">3</span></a>
+            </div>
+            <div class="list-item">
+                <div class="count-badge">Click: <span class="count">0</span></div>
+                <a href="#" target="_blank" class="img-link-space" onclick="countUp(this)">imgリンク <span class="link-text">4</span></a>
+            </div>
+            <div class="list-item">
+                <div class="count-badge">Click: <span class="count">0</span></div>
+                <a href="#" target="_blank" class="img-link-space" onclick="countUp(this)">imgリンク <span class="link-text">5</span></a>
+            </div>
+            <div class="list-item">
+                <div class="count-badge">Click: <span class="count">0</span></div>
+                <a href="#" target="_blank" class="img-link-space" onclick="countUp(this)">imgリンク <span class="link-text">6</span></a>
+            </div>
+            <div class="list-item">
+                <div class="count-badge">Click: <span class="count">0</span></div>
+                <a href="#" target="_blank" class="img-link-space" onclick="countUp(this)">imgリンク <span class="link-text">7</span></a>
+            </div>
+            <div class="list-item">
+                <div class="count-badge">Click: <span class="count">0</span></div>
+                <a href="#" target="_blank" class="img-link-space" onclick="countUp(this)">imgリンク <span class="link-text">8</span></a>
+            </div>
+            <div class="list-item">
+                <div class="count-badge">Click: <span class="count">0</span></div>
+                <a href="#" target="_blank" class="img-link-space" onclick="countUp(this)">imgリンク <span class="link-text">9</span></a>
+            </div>
+            <div class="list-item">
+                <div class="count-badge">Click: <span class="count">0</span></div>
+                <a href="#" target="_blank" class="img-link-space" onclick="countUp(this)">imgリンク <span class="link-text">10</span></a>
+            </div>
+        </div>
+
+    </div>
+
+    <ul class="pagination">
+        <li class="page-item active" onclick="changePage(this)">1</li>
+        <li class="page-item" onclick="changePage(this)">2</li>
+        <li class="page-item" onclick="changePage(this)">3</li>
+        <li class="page-item" onclick="changePage(this)">4</li>
+        <li class="page-item" onclick="changePage(this)">5</li>
+        <li class="page-item" onclick="changePage(this)">6</li>
+        <li class="page-item" onclick="changePage(this)">7</li>
+        <li class="page-item" onclick="changePage(this)">8</li>
+        <li class="page-item" onclick="changePage(this)">9</li>
+        <li class="page-item" onclick="changePage(this)">10</li>
+    </ul>
+
+    <script>
+        // 画像リンクをクリックしたときの処理
+        function countUp(linkElement) {
+            const sound = document.getElementById('click-sound');
+            sound.currentTime = 0; 
+            sound.play().catch(error => {
+                console.log("ブラウザの制限により、初回操作前の自動再生はブロックされる場合があります:", error);
+            });
+
+            const listItem = linkElement.closest('.list-item');
+            const countSpan = listItem.querySelector('.count');
+            let currentCount = parseInt(countSpan.textContent, 10);
+            countSpan.textContent = currentCount + 1;
+        }
+
+        // ページネーションの切り替え処理
+        function changePage(element) {
+            document.querySelectorAll('.page-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            element.classList.add('active');
+
+            const pageNum = parseInt(element.textContent, 10);
+            const startNumber = (pageNum - 1) * 10 + 1;
+
+            const linkTexts = document.querySelectorAll('.link-text');
+            /* 【修正】不要なエラー行（textSpan.textContent = startNumber + index;）を削除 */
+            linkTexts.forEach((textSpan, index) => {
+                textSpan.textContent = startNumber + index;
+            });
+        }
+    </script>
+
+
+<nav class="bottom-nav" id="bottomNav">
+    <a href="ニューワールド.html" class="bottom-nav-item active" id="btnHome" onclick="switchMainTab('timeline'); return false;">
+        <i class="fa-solid fa-house"></i>
+        <span>ホーム</span>
+    </a>
+    <a href="リンクリンカー.html" class="bottom-nav-item" id="btnSearch">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <span>無料</span>
+    </a>
+    <a href="ライブ.html" class="bottom-nav-item" id="btnVideo" onclick="switchMainTab('video'); return false;">
+        <i class="fa-solid fa-video"></i>
+        <span>ライブ</span>
+    </a>
+    <a href="EC.html" class="bottom-nav-item" id="btnLive">
+        <i class="fa-regular fa-bell"></i>
+        <span>ショップ</span>
+    </a>
+    <a href="企業.html" class="bottom-nav-item" id="btnCompany">
+        <i class="fa-solid fa-shop"></i>
+        <span>企業</span>
+    </a>
+    <a href="通知とDM.html" class="bottom-nav-item" id="btnDM">
+        <i class="fa-regular fa-envelope"></i>
+        <span>通知とDM</span>
+    </a>
+</nav>
+
+<footer class="footer-copyright">
+    &copy; 2026 New World. All Rights Reserved.
+</footer>
+
+</body>
+</html>
+
+
+

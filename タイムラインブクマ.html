@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TLブックマーク - New World</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="ニューワールド2.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        
+        /* 元のスタイルを維持 */
+        .empty-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: #536471;
+            text-align: center;
+        }
+        .empty-message i { font-size: 48px; margin-bottom: 16px; color: #cfd9de; }
+        .empty-message p { font-size: 15px; font-weight: bold; }
+        
+        .pagination-container {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            padding: 20px 10px;
+            background-color: #ffffff;
+            border-top: 1px solid #eff3f4;
+        }
+        .page-btn {
+            display: flex; align-items: center; justify-content: center;
+            min-width: 35px; height: 35px; border: 1px solid #cfd9de;
+            border-radius: 8px; background-color: #ffffff; color: #0f1419;
+            font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none;
+        }
+        .page-btn.active { background-color: #1d9bf0; color: #ffffff; border-color: #1d9bf0; }
+        .page-btn.disabled { color: #cfd9de; border-color: #eff3f4; cursor: not-allowed; pointer-events: none; }
+
+        /* 追加：SNS風のボトムアクション用スタイル */
+        .tweet-actions {
+            display: flex;
+            justify-content: flex-start;
+            gap: 40px;
+            margin-top: 10px;
+            color: #536471;
+            font-size: 13px;
+        }
+        .action-item {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s;
+        }
+        .action-item.bookmarked {
+            color: #1d9bf0 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="header">
+                <div class="header-top">
+                    <a href="javascript:history.back()" style="color: #0f1419; text-decoration: none; margin-right: 10px;">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <span>タイムライン ブックマーク</span>
+                </div>
+            </div>
+            
+            <div class="content-section active">
+                <div class="timeline" id="bookmarkTimelineList"></div>
+
+                <div class="pagination-container" id="pagination">
+                    <button class="page-btn disabled" id="prevBtn"><i class="fa-solid fa-chevron-left"></i></button>
+                    <div id="pageNumbers" style="display: flex; gap: 6px;"></div>
+                    <button class="page-btn disabled" id="nextBtn"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const ITEMS_PER_PAGE = 10;
+        let currentPage = 1;
+        let bookmarks = [];
+    
+        const listContainer = document.getElementById('bookmarkTimelineList');
+        const paginationContainer = document.getElementById('pagination');
+        const pageNumbersContainer = document.getElementById('pageNumbers');
+    
+        // データの読み込み
+        function loadBookmarks() {
+            bookmarks = JSON.parse(localStorage.getItem('tl_bookmarks')) || [];
+        }
+    
+        function renderTimeline() {
+            loadBookmarks();
+            listContainer.innerHTML = '';
+            
+            if (bookmarks.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="empty-message">
+                        <i class="fa-regular fa-bookmark"></i>
+                        <p>ブックマークはまだありません</p>
+                    </div>
+                `;
+                paginationContainer.style.display = 'none';
+                return;
+            }
+    
+            paginationContainer.style.display = 'flex';
+            
+            const start = (currentPage - 1) * ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
+            const pageItems = bookmarks.slice(start, end);
+    
+            pageItems.forEach((item, index) => {
+                const globalIndex = start + index; // 全体配列内でのインデックス
+                const tweet = document.createElement('div');
+                tweet.className = 'tweet';
+                
+                // メイン画面のカウント数（item.count）を反映し、青色（bookmarked）の状態でレンダリング
+                tweet.innerHTML = `
+                    <div class="tweet-main" style="padding: 12px; border-bottom: 1px solid #eff3f4;">
+                        <div class="avatar" style="width: 48px; height: 48px; border-radius: 50%; background-color: #cfd9de; float: left; margin-right: 12px;"></div>
+                        <div class="tweet-content" style="overflow: hidden;">
+                            <div class="tweet-user-info" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <span class="screen-name" style="font-weight: bold; color: #0f1419;">${item.name}</span>
+                                    <span class="user-id" style="color: #536471; margin-left: 4px;">${item.user}</span>
+                                </div>
+                                <button onclick="removeBookmark(${globalIndex})" style="background: none; border: none; color: #f43f5e; cursor: pointer; font-size: 13px;">
+                                    <i class="fa-solid fa-trash-can"></i> 解除
+                                </button>
+                            </div>
+                            <p class="tweet-text" style="margin-top: 5px; color: #0f1419; font-size: 15px; line-height: 1.5;">${item.text}</p>
+                            
+                            <div class="tweet-actions">
+                                <span class="action-item bookmarked" onclick="removeBookmark(${globalIndex})">
+                                    <i class="fa-solid fa-bookmark"></i> 
+                                    <span class="count">${item.count || 0}</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                listContainer.appendChild(tweet);
+            });
+    
+            setupPagination();
+        }
+    
+        // ブックマークを削除（カウントを減らす動作を兼ねる）
+        window.removeBookmark = function(index) {
+            // 一覧から削除（LocalStorage側の配列から除外されるため、メイン画面に戻ったときもカウントが減った状態が維持されます）
+            bookmarks.splice(index, 1);
+            localStorage.setItem('tl_bookmarks', JSON.stringify(bookmarks));
+            
+            // ページ位置の安全な調整
+            const maxPage = Math.ceil(bookmarks.length / ITEMS_PER_PAGE) || 1;
+            if (currentPage > maxPage) {
+                currentPage = maxPage;
+            }
+            renderTimeline();
+        };
+    
+        function setupPagination() {
+            pageNumbersContainer.innerHTML = '';
+            const totalPages = Math.min(Math.ceil(bookmarks.length / ITEMS_PER_PAGE), 10);
+            if(totalPages <= 1) {
+                pageNumbersContainer.parentElement.style.display = 'none';
+                return;
+            } else {
+                pageNumbersContainer.parentElement.style.display = 'flex';
+            }
+    
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                btn.innerText = i;
+                btn.onclick = () => {
+                    currentPage = i;
+                    renderTimeline();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+                pageNumbersContainer.appendChild(btn);
+            }
+    
+            document.getElementById('prevBtn').className = `page-btn ${currentPage === 1 ? 'disabled' : ''}`;
+            document.getElementById('nextBtn').className = `page-btn ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''}`;
+        }
+    
+        // 前へ・次へボタンのクリックイベント割り当て
+        document.getElementById('prevBtn').onclick = () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTimeline();
+            }
+        };
+        document.getElementById('nextBtn').onclick = () => {
+            const totalPages = Math.ceil(bookmarks.length / ITEMS_PER_PAGE);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTimeline();
+            }
+        };
+
+        // 初回読み込み
+        renderTimeline();
+    </script>
+</body>
+</html>
+
+
+
+
+
+

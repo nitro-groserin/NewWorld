@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>動画ブックマーク - New World</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="ニューワールド2.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .video-bookmark-vertical-list { display: flex; flex-direction: column; background-color: #000000; width: 100%; }
+        .video-bookmark-vertical-list .video-card { scroll-snap-align: none; border-bottom: 1px solid #1a1a1a; flex-shrink: 0; position: relative; }
+        
+        .empty-message {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 80px 20px; color: #888888; text-align: center; background-color: #000000;
+        }
+        .empty-message i { font-size: 48px; margin-bottom: 16px; color: #333333; }
+        .empty-message p { font-size: 15px; font-weight: bold; }
+
+        .pagination-container {
+            display: none; justify-content: center; align-items: center; gap: 6px;
+            padding: 25px 10px; background-color: #ffffff; border-top: 1px solid #eff3f4;
+        }
+        .page-btn {
+            display: flex; align-items: center; justify-content: center;
+            min-width: 35px; height: 35px; border: 1px solid #cfd9de;
+            border-radius: 8px; background-color: #ffffff; color: #0f1419;
+            font-size: 14px; font-weight: bold; cursor: pointer; text-decoration: none;
+        }
+        .page-btn.active { background-color: #1d9bf0; color: #ffffff; border-color: #1d9bf0; }
+        .page-btn.disabled { color: #cfd9de; border-color: #eff3f4; cursor: not-allowed; pointer-events: none; }
+
+        /* 追加：動画一覧画面用の解除ホバーボタン（タップしやすく右上に配置） */
+        .video-remove-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #f43f5e;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.2s;
+        }
+        .video-remove-btn:hover {
+            background: rgba(244, 63, 94, 0.2);
+            border-color: #f43f5e;
+        }
+        /* ブックマーク色変化（メイン画面のスタイルに合わせる用） */
+        .v-action-item.bookmarked {
+            color: #1d9bf0 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <main class="main-content" style="background-color: #000000; padding-bottom: 0;">
+            <div class="header">
+                <div class="header-top">
+                    <a href="javascript:history.back()" style="color: #0f1419; text-decoration: none; margin-right: 10px;">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <span>動画 ブックマーク</span>
+                </div>
+            </div>
+            
+            <div class="content-section active">
+                <div class="video-bookmark-vertical-list" id="bookmarkVideoList"></div>
+
+                <div class="pagination-container" id="pagination">
+                    <button class="page-btn disabled" id="prevBtn"><i class="fa-solid fa-chevron-left"></i></button>
+                    <div id="pageNumbers" style="display: flex; gap: 6px;"></div>
+                    <button class="page-btn disabled" id="nextBtn"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const ITEMS_PER_PAGE = 10;
+        let currentPage = 1;
+        let videoBookmarks = [];
+
+        const listContainer = document.getElementById('bookmarkVideoList');
+        const paginationContainer = document.getElementById('pagination');
+        const pageNumbersContainer = document.getElementById('pageNumbers');
+
+        // データの最新読み込み関数
+        function loadVideoBookmarks() {
+            videoBookmarks = JSON.parse(localStorage.getItem('video_bookmarks')) || [];
+        }
+
+        function renderVideos() {
+            loadVideoBookmarks(); // 常に最新の状態をロード
+            listContainer.innerHTML = '';
+            
+            if (videoBookmarks.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="empty-message">
+                        <i class="fa-solid fa-video-slash"></i>
+                        <p>ブックマークされた動画はまだありません</p>
+                    </div>
+                `;
+                paginationContainer.style.display = 'none';
+                return;
+            }
+
+            paginationContainer.style.display = 'flex';
+
+            const start = (currentPage - 1) * ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
+            const pageItems = videoBookmarks.slice(start, end);
+
+            pageItems.forEach((item, index) => {
+                const globalIndex = start + index; // 削除対象を特定するための全体インデックス
+                const videoCard = document.createElement('div');
+                videoCard.className = 'video-card';
+                
+                // メインのカウント（item.count）を右側アクションに反映
+                videoCard.innerHTML = `
+                    <button class="video-remove-btn" onclick="removeVideoBookmark(${globalIndex})">
+                        <i class="fa-solid fa-trash-can"></i> 解除
+                    </button>
+
+                    <div class="video-placeholder" style="background: linear-gradient(180deg, ${item.color || '#1c9bf0'}, #000000);">
+                        <i class="fa-solid fa-play" style="font-size: 40px; margin-bottom: 10px; opacity: 0.7;"></i>
+                        <span>${item.title || '[ ブックマーク動画 ]'}</span>
+                    </div>
+                    <div class="video-time-counter">
+                        <i class="fa-regular fa-clock"></i> <span class="time-value">${item.time || '00:00'}</span>
+                    </div>
+                    <div class="video-info-overlay">
+                        <div class="video-user">${item.user || '@username'}</div>
+                        <div class="video-desc">${item.desc || ''}</div>
+                    </div>
+                    
+                    <div class="video-actions-overlay">
+                        <div class="v-action-item bookmarked" onclick="removeVideoBookmark(${globalIndex})">
+                            <i class="fa-solid fa-bookmark" style="color: #1d9bf0;"></i>
+                            <span>${item.count || 0}</span>
+                        </div>
+                    </div>
+                `;
+                listContainer.appendChild(videoCard);
+            });
+
+            setupPagination();
+        }
+
+        // この画面から動画のブックマークを直接解除する関数
+        window.removeVideoBookmark = function(index) {
+            videoBookmarks.splice(index, 1);
+            localStorage.setItem('video_bookmarks', JSON.stringify(videoBookmarks));
+            
+            // ページ範囲を超えないように調整
+            const maxPage = Math.ceil(videoBookmarks.length / ITEMS_PER_PAGE) || 1;
+            if (currentPage > maxPage) {
+                currentPage = maxPage;
+            }
+            renderVideos();
+        };
+
+        function setupPagination() {
+            pageNumbersContainer.innerHTML = '';
+            const totalPages = Math.min(Math.ceil(videoBookmarks.length / ITEMS_PER_PAGE), 10);
+
+            // 1ページ以下ならペジネーションを非表示
+            if (totalPages <= 1) {
+                paginationContainer.style.display = 'none';
+                return;
+            } else {
+                paginationContainer.style.display = 'flex';
+            }
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                btn.innerText = i;
+                btn.onclick = () => {
+                    currentPage = i;
+                    renderVideos();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+                pageNumbersContainer.appendChild(btn);
+            }
+
+            document.getElementById('prevBtn').className = `page-btn ${currentPage === 1 ? 'disabled' : ''}`;
+            document.getElementById('nextBtn').className = `page-btn ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''}`;
+        }
+
+        // ページネーション送りボタンの動作をバインド
+        document.getElementById('prevBtn').onclick = () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderVideos();
+            }
+        };
+        document.getElementById('nextBtn').onclick = () => {
+            const totalPages = Math.ceil(videoBookmarks.length / ITEMS_PER_PAGE);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderVideos();
+            }
+        };
+
+        // 初期描画
+        renderVideos();
+    </script>
+</body>
+</html>
+
+
+
+
+
+
