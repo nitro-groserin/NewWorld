@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New World - 投稿</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* 画面いっぱいのテキストエリア */
+        .full-textarea {
+            width: 100%;
+            height: 100%;
+            border: none;
+            resize: none;
+            outline: none;
+            padding: 24px 24px 150px 24px; /* ボタン類と被らないよう下部余白を広げました */
+            font-size: 20px;
+            line-height: 1.6;
+            color: #0f1419;
+        }
+
+        /* 右下のコントロールエリア（カウントとボタンをまとめる要素） */
+        .controls-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end; /* 右寄せ */
+            gap: 12px; /* カウントとボタンの隙間 */
+        }
+
+        /* 文字数カウントのスタイル */
+        .char-counter {
+            font-size: 14px;
+            color: #536471; /* 通常時のグレー */
+            font-weight: bold;
+            padding-right: 8px; /* ボタンの位置との微調整用 */
+            transition: color 0.2s ease;
+        }
+
+        /* 警告時の赤色スタイル */
+        .char-counter.error {
+            color: #f4212e; /* Twitter/Xライ風の赤色 */
+        }
+
+        /* 右下に固定する丸いボタン */
+        .floating-button {
+            background-color: #1d9bf0;
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 9999px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: background-color 0.2s, opacity 0.2s;
+        }
+
+        /* ボタン無効化（disabled）時のスタイル */
+        .floating-button:disabled {
+            background-color: #1d9bf0;
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+
+    <textarea id="tweetInput" class="full-textarea" placeholder="いまどうしてる？"></textarea>
+    
+    <div class="controls-container">
+        <div id="charCounter" class="char-counter">0 / 140</div>
+        <button id="postBtn" class="floating-button">ポストする</button>
+    </div>
+
+
+
+
+
+
+    <script>
+        
+        // 1. オーディオ要素を作成し、ループ設定を有効にする
+const audio = new Audio('sound-box/BGM - 149 - Reincarnation @ フリーBGM DOVA-SYNDROME OFFICIAL YouTube CHANNEL.mp3');
+audio.loop = true; // ループ再生をON
+audio.preload = 'auto';
+
+// 2. 画面を一度クリックしたら再生を開始（1回クリックされたらイベントは自動消滅）
+window.addEventListener('click', () => {
+    audio.play()
+        .then(() => console.log("ループ再生を開始しました。"))
+        .catch(err => console.error("再生に失敗しました:", err));
+}, { once: true });
+
+
+
+        const MAX_CHARACTER_COUNT = 140; // 最大文字数制限
+        const FORBIDDEN_WORDS = [
+            '中部電力ミライズ',
+            'エイブル',
+            'ソフトバンクグループ',
+            'LINE',
+            '郵便局',
+            'sad',
+            'https://2ch.sc/'
+            // ※ 不要な空文字 ('') は削除しました
+        ]; 
+    
+        const textarea = document.getElementById('tweetInput');
+        const button = document.getElementById('postBtn');
+        const counter = document.getElementById('charCounter');
+    
+        let hasForbiddenWord = false;
+    
+        // リアルタイム入力監視処理
+        textarea.addEventListener('input', () => {
+            let currentText = textarea.value;
+            hasForbiddenWord = false; 
+    
+            // 1. 基本的な禁止ワードの検出
+            const matchesForbiddenWord = FORBIDDEN_WORDS.some(word => currentText.includes(word));
+            // 英数字（大文字・小文字・数字）が1文字でも含まれているか判定
+            const hasAlphanumeric = /[a-zA-Z0-9]/.test(currentText);
+    
+            // 禁止ワード、または英数字が含まれている場合の検証
+            if (matchesForbiddenWord || hasAlphanumeric) {
+                
+                // 【例外処理】テキスト内に http:// または https:// から始まるURLが含まれているかチェック
+                const urlRegex = /https?:\/\/[\w!?/+\-_~=;.,*&@#%]+/g;
+                
+                if (urlRegex.test(currentText)) {
+                    // URLが含まれていても、それが「https://2ch.sc/」などの禁止URLであればアウト
+                    const containsForbiddenUrl = FORBIDDEN_WORDS.some(word => 
+                        (word.includes('.') || word.includes('/')) && currentText.includes(word)
+                    );
+                    
+                    if (containsForbiddenUrl) {
+                        hasForbiddenWord = true; // 禁止URLなのでブロック
+                        console.log(`【フォビドゥン】禁止URLを検知しました。`);
+                    } else {
+                        hasForbiddenWord = false; // 安全なURL形式の英数字なのでセーフ（通す）
+                    }
+                } else {
+                    // URL形式ではないのに、禁止ワードがある、または英数字（sadなど）が含まれている場合はアウト
+                    hasForbiddenWord = true;
+                    console.log(`【フォビドゥン】禁止ワードまたはURL以外の英数字を検知しました。`);
+                }
+            }
+    
+            // 2. 文字数チェック
+            const currentLength = currentText.length;
+            const isOverLimit = currentLength > MAX_CHARACTER_COUNT;
+    
+            // 3. カウント数のテキスト更新
+            counter.textContent = `${currentLength} / ${MAX_CHARACTER_COUNT}`;
+    
+            // 4. エラーハンドリング
+            if (isOverLimit || hasForbiddenWord) {
+                counter.classList.add('error');
+                button.disabled = true; 
+            } else {
+                counter.classList.remove('error');
+                button.disabled = false; 
+            }
+        });
+    
+        // ポストボタンを押した時の処理
+        button.addEventListener('click', () => {
+            const finalPayload = textarea.value.trim(); 
+            
+            if (finalPayload.length === 0) {
+                console.log("【ブロック】入力が空のため、ポストされませんでした。");
+                return; 
+            }
+    
+            // 投稿オブジェクトの生成
+            const newPost = {
+                id: 'user-post-' + Date.now(), 
+                text: finalPayload,
+                time: "今",
+                name: "デザインサンプル",
+                user: "@design_test"
+            };
+    
+            // 既存の保存リスト（newWorldPosts）を取得して先頭に追加
+            let savedPosts = JSON.parse(localStorage.getItem('newWorldPosts')) || [];
+            savedPosts.unshift(newPost);
+            localStorage.setItem('newWorldPosts', JSON.stringify(savedPosts));
+    
+            // 入力欄をクリア
+            textarea.value = "";
+    
+            // タイムラインページへ遷移
+            window.location.href = 'ニューワールド.html'; 
+        });
+    </script>
+
+
+
+
+
+</body>
+</html>
+
+
+
+
