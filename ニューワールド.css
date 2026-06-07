@@ -1,0 +1,723 @@
+body {
+    background-color: #ffffff;
+    color: #0f1419;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    max-width: 1250px;
+    padding: 0 20px;
+    justify-content: center;
+    flex: 1;
+}
+
+/* ==========================================
+   中央：メインエリア
+   ========================================== */
+.main-content {
+    flex: 1;
+    max-width: 600px;
+    border-left: 1px solid #eff3f4;
+    border-right: 1px solid #eff3f4;
+    min-height: 100vh;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 90px;
+}
+
+.header {
+    position: sticky;
+    top: 0;
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #eff3f4;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+    padding: 15px 15px 5px 15px;
+    font-size: 20px;
+    font-weight: bold;
+    gap: 12px;
+}
+
+.header-avatar {
+    width: 32px;
+    height: 32px;
+    background-color: #cfd9de;
+    border-radius: 50%;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #536471;
+    font-size: 14px;
+}
+.header-avatar:hover { opacity: 0.8; }
+
+.main-tabs { display: flex; width: 100%; margin-top: 10px; }
+
+.main-tab-item {
+    flex: 1;
+    text-align: center;
+    padding: 15px 0;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 15px;
+    color: #536471;
+    position: relative;
+    transition: background-color 0.2s;
+}
+.main-tab-item:hover { background-color: rgba(15, 20, 25, 0.03); }
+.main-tab-item.active { color: #0f1419; }
+.main-tab-item.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background-color: #1d9bf0;
+    border-radius: 9999px;
+}
+
+.content-section { display: none; }
+.content-section.active { display: block; }
+
+/* --- タイムライン要素 --- */
+.post-box { display: flex; padding: 15px; border-bottom: 1px solid #eff3f4; }
+.avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #cfd9de;
+    border-radius: 50%;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+.post-input-area { flex: 1; }
+.post-input {
+    width: 100%;
+    border: none;
+    resize: none;
+    font-size: 20px;
+    outline: none;
+    color: #0f1419;
+}
+.post-box-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+.media-icons { color: #1d9bf0; font-size: 16px; cursor: pointer; }
+.media-icons i { margin-right: 12px; }
+.submit-btn {
+    background-color: #1d9bf0;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.floating-post-btn {
+    position: fixed;
+    bottom: 110px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    background-color: #1d9bf0;
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    z-index: 70;
+    border: none;
+    text-decoration: none;
+    transition: transform 0.2s, background-color 0.2s;
+}
+.floating-post-btn:active {
+    transform: scale(0.95);
+    background-color: #1a8cd8;
+}
+
+.tweet {
+    display: flex;
+    padding: 15px;
+    border-bottom: 1px solid #eff3f4;
+    flex-direction: column;
+}
+.tweet:hover { background-color: #f7f7f7; }
+.tweet-main { display: flex; }
+.tweet-content { flex: 1; }
+.tweet-user-info { font-size: 15px; margin-bottom: 2px; }
+.screen-name { font-weight: bold; }
+.user-id, .tweet-time { color: #536471; margin-left: 4px; }
+.tweet-text { font-size: 15px; line-height: 20px; white-space: pre-wrap; }
+
+.tweet-actions {
+    display: flex;
+    justify-content: space-between;
+    max-width: 425px;
+    margin-top: 12px;
+    color: #536471;
+    font-size: 13px;
+}
+.action-item { cursor: pointer; display: inline-flex; align-items: center; gap: 5px; user-select: none; transition: color 0.2s; }
+.action-item:hover { color: #1d9bf0; }
+
+/* 🟢 リポスト時のアクティブカラー（緑色） */
+.action-item.reposted {
+    color: #00ba7c !important;
+}
+
+/* 🔵 コメントが展開されている時のアクティブカラー（青色） */
+.action-item.comment-active {
+    color: #1d9bf0;
+}
+
+/* 🟢 返信（コメント）エリア全体のデザイン */
+.replies-container {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eff3f4;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    padding: 12px;
+}
+.reply-item { display: flex; margin-bottom: 12px; font-size: 14px; }
+.reply-avatar {
+    width: 32px;
+    height: 32px;
+    background-color: #e1e8ed;
+    border-radius: 50%;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+.reply-body { flex: 1; }
+.reply-user { font-weight: bold; font-size: 13px; }
+.reply-text { color: #0f1419; margin-top: 2px; line-height: 1.4; }
+
+/* 返信フォーム */
+.reply-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    align-items: center;
+}
+.reply-input {
+    flex: 1;
+    border: 1px solid #cfd9de;
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 14px;
+    outline: none;
+    background-color: #ffffff;
+}
+.reply-input:focus { border-color: #1d9bf0; }
+.reply-submit-btn {
+    background-color: #1d9bf0;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 9999px;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+/* --- TikTok風動画要素 --- */
+#videoSection { background-color: #000000; }
+.video-feed {
+    height: calc(100vh - 205px);
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+}
+.video-feed::-webkit-scrollbar { display: none; }
+
+.video-card {
+    width: 100%;
+    height: calc(100vh - 205px);
+    scroll-snap-align: start;
+    position: relative;
+    background-color: #000000;
+    border-bottom: 1px solid #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.video-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    padding: 20px;
+}
+
+.video-info-overlay {
+    position: absolute;
+    bottom: 20px;
+    left: 15px;
+    color: #ffffff;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+    z-index: 5;
+    pointer-events: none;
+    max-width: 75%;
+}
+.video-user { font-weight: bold; margin-bottom: 5px; font-size: 15px; }
+.video-desc { font-size: 13px; opacity: 0.9; margin-bottom: 5px; line-height: 1.4; }
+.video-music { font-size: 12px; opacity: 0.8; }
+
+.video-actions-overlay {
+    position: absolute;
+    right: 12px;
+    bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    z-index: 5;
+    color: #ffffff;
+}
+.v-action-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
+.v-action-item i {
+    font-size: 24px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 10px;
+    border-radius: 50%;
+    margin-bottom: 4px;
+    transition: transform 0.2s;
+}
+.v-action-item i:hover { transform: scale(1.1); }
+.v-action-item span { font-size: 12px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
+
+/* 右側サイドバー */
+.right-sidebar {
+    width: 350px;
+    padding: 20px 0 0 20px;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    background-color: #ffffff;
+}
+.dummy-trends {
+    background-color: #f7f7f7;
+    padding: 15px;
+    border-radius: 16px;
+    margin-bottom: 15px;
+}
+.dummy-trends h3 { margin-bottom: 10px; font-size: 18px; }
+.trend-item { margin-bottom: 12px; font-size: 14px; list-style: none;}
+.trend-category { color: #536471; font-size: 12px; }
+.trend-name { font-weight: bold; color: #0f1419; }
+
+/* ==========================================
+   画面最下部固定パーツ
+   ========================================== */
+.bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 30px;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: #ffffff;
+    border-top: 1px solid #eff3f4;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 80;
+}
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #536471;
+    font-size: 9px;
+    cursor: pointer;
+    flex: 1;
+    padding: 5px 0;
+    text-decoration: none;
+}
+.bottom-nav-item i { font-size: 18px; margin-bottom: 3px; }
+.bottom-nav-item.active { color: #0f1419; }
+
+.footer-copyright {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    background-color: #f7f9f9;
+    color: #536471;
+    font-size: 11px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top: 1px solid #eff3f4;
+    z-index: 80;
+}
+
+/* ドロワー */
+.drawer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.drawer-overlay.open { opacity: 1; visibility: visible; }
+
+.drawer-menu {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100%;
+    background-color: #ffffff;
+    z-index: 101;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+    transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+.drawer-menu.open { left: 0; }
+.drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+.drawer-user-info { display: flex; flex-direction: column; }
+.drawer-user-info .name { font-weight: bold; font-size: 18px; }
+.drawer-user-info .id { color: #536471; font-size: 14px; }
+.drawer-close-btn { background: none; border: none; font-size: 20px; color: #0f1419; cursor: pointer; padding: 4px 8px; }
+.drawer-nav-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.drawer-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 10px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #0f1419;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+.drawer-nav-item:hover { background-color: rgba(15, 20, 25, 0.1); }
+
+@media (max-width: 1095px) { .right-sidebar { display: none; } }
+@media (max-width: 700px) {
+    body { position: fixed; width: 100%; height: 100%; overflow: hidden; }
+    .container { padding: 0; height: 100%; }
+    .main-content { width: 100%; max-width: 100%; height: calc(100vh - 90px); border: none; padding: 0; }
+    .video-feed, .video-card { height: calc(100vh - 205px); }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================
+    追加・修正：動画エリアの各種新ボタン
+   ========================================== */
+
+/* 左上：視聴時間カウンター */
+.video-time-counter {
+    position: absolute;
+    top: 20px;
+    left: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #ffffff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 左側：ショップボタンエリア */
+.video-left-shop {
+    position: absolute;
+    left: 15px;
+    bottom: 140px; /* 動画情報オーバーレイの上に配置 */
+    z-index: 10;
+}
+
+.v-shop-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(29, 155, 240, 0.85); /* 鮮やかなブルー背景 */
+    color: #ffffff;
+    text-decoration: none;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.v-shop-btn:hover {
+    transform: scale(1.05);
+    background: #1a8cd8;
+}
+
+.v-shop-btn i {
+    font-size: 18px;
+    margin-bottom: 2px;
+}
+
+.v-shop-btn span {
+    font-size: 9px;
+    font-weight: bold;
+}
+
+/* 右側アクションオーバーレイの微調整（ボタン順序の変更に伴う） */
+.video-actions-overlay {
+    position: absolute;
+    right: 12px;
+    bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px; /* ボタン同士の間隔 */
+    z-index: 5;
+    color: #ffffff;
+}
+
+/* ボトムナビゲーションバーの文字サイズなどの微調整 */
+.bottom-nav-item span {
+    font-size: 9px;
+    margin-top: 2px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* 動画コメントエリア：動画の上に被さるように完全固定 */
+.v-replies-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60%; /* 動画の下側60%のサイズで上に被さる */
+    background: rgba(15, 15, 15, 0.92); /* 高級感のある半透明の黒 */
+    backdrop-filter: blur(8px); /* 背景の動画を少しぼかす */
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 30; /* 最前面に表示 */
+    display: flex;
+    flex-direction: column;
+    padding: 14px;
+    box-sizing: border-box;
+    transition: transform 0.3s ease; /* 開閉時のアニメーション用 */
+}
+
+/* コメント枠のヘッダー（タイトルと閉じるボタン） */
+.v-replies-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+    font-weight: bold;
+    font-size: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 10px;
+}
+.v-replies-close {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 18px;
+    cursor: pointer;
+}
+.v-replies-close:hover {
+    color: #fff;
+}
+
+/* コメント履歴のスクロール領域 */
+.v-reply-list {
+    overflow-y: auto;
+    flex-grow: 1;
+    margin-bottom: 10px;
+    padding-right: 4px;
+}
+/* スクロールバーのデザインをスタイリッシュに */
+.v-reply-list::-webkit-scrollbar {
+    width: 4px;
+}
+.v-reply-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+/* 各コメントアイテム */
+.v-reply-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    color: #fff;
+    font-size: 13px;
+    align-items: flex-start;
+    position: relative;
+}
+.v-reply-avatar {
+    width: 32px;
+    height: 32px;
+    background-color: #536471;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.v-reply-body {
+    flex-grow: 1;
+    padding-right: 25px; /* 削除ボタンと重ならないようにスペースを空ける */
+}
+.v-reply-user {
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 2px;
+}
+.v-reply-user span.user-id {
+    color: #888;
+    font-size: 11px;
+    margin-left: 4px;
+}
+.v-reply-text {
+    color: #e1e1e1;
+    line-height: 1.4;
+    word-break: break-all;
+}
+
+/* ★ その場で消せる削除（ゴミ箱）ボタン */
+.v-reply-delete-btn {
+    position: absolute;
+    right: 0;
+    top: 4px;
+    background: none;
+    border: none;
+    color: #536471;
+    cursor: pointer;
+    font-size: 13px;
+    transition: color 0.2s;
+}
+.v-reply-delete-btn:hover {
+    color: #f4212e; /* ホバー時に警告赤 */
+}
+
+/* 入力フォーム部分 */
+.v-reply-form {
+    display: flex;
+    gap: 8px;
+    background: #000;
+    padding: 8px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.v-reply-input {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    padding: 4px 8px;
+    color: #fff;
+    font-size: 13px;
+}
+.v-reply-input:focus {
+    outline: none;
+}
+.v-reply-submit-btn {
+    background-color: #1d9bf0;
+    border: none;
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+
+
+
+
+
+
+/* タイムラインの各コメント枠を削除ボタンの基準点にする */
+.reply-item {
+    position: relative;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-right: 30px; /* 削除ボタンと被らないように */
+}
+
+
+
+
+

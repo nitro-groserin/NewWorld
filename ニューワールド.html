@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>New World</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="ニューワールド.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        /* ブックマーク時の色変化用スタイル */
+        .action-item.bookmarked, .v-action-item.bookmarked {
+            color: #1d9bf0 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer(false)"></div>
+
+    <nav class="drawer-menu" id="drawerMenu">
+        <div class="drawer-header">
+            <div class="drawer-user-info">
+                <span class="name">ユーザーネーム</span>
+                <span class="id">@user_test</span>
+            </div>
+            <button class="drawer-close-btn" onclick="toggleDrawer(false)">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <ul class="drawer-nav-list">
+            <li><a href="#" class="drawer-nav-item"><i class="fa-regular fa-user"></i> プロフィール</a></li>
+            <li><a href="リンクリンカー.html" class="drawer-nav-item"><i class="fa-solid fa-link"></i>リンク</a></li>
+            <li><a href="タイムラインブクマ.html?tab=timeline" class="drawer-nav-item"><i class="fa-regular fa-bookmark"></i> TLブックマーク</a></li>
+            <li><a href="動画ブクマ.html?tab=video" class="drawer-nav-item"><i class="fa-solid fa-bookmark"></i> 動画ブックマーク</a></li>
+            <li><a href="#" class="drawer-nav-item"><i class="fa-regular fa-file-lines"></i> リリスト</a></li>
+            <li><a href="#" class="drawer-nav-item"><i class="fa-solid fa-gear"></i> 設定とプライバシー</a></li>
+            
+            <li><a href="#" class="drawer-nav-item" style="color: red;"><i class="fa-solid fa-right-from-bracket"></i> ログアウト</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <main class="main-content" id="mainTimeline">
+            <div class="header">
+                <div class="header-top">
+                    <div class="header-avatar" onclick="toggleDrawer(true)">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <span>New World</span>
+                </div>
+                <div class="main-tabs">
+                    <div class="main-tab-item active" onclick="switchMainTab('timeline', this)">タイムライン</div>
+                    <div class="main-tab-item" onclick="location.href='リンクリンカー.html'">リンク</div>
+                    <div class="main-tab-item" onclick="switchMainTab('video', this)">動画</div>
+                </div>
+            </div>
+            
+            <div id="timelineSection" class="content-section active">
+                <div class="post-box" id="postBoxTarget">
+                    <div class="avatar"></div>
+                    <div class="post-input-area">
+                        <textarea class="post-input" id="postInput" placeholder="いまどうしてる？" rows="2" maxlength="140"></textarea>
+                        <div class="post-box-actions">
+                            <div class="media-icons">
+                                <i class="fa-regular fa-image"></i>
+                                <i class="fa-solid fa-list-ul"></i>
+                                <i class="fa-regular fa-face-smile"></i>
+                                <i class="fa-regular fa-calendar"></i>
+                            </div>
+                            <button class="submit-btn" onclick="createNewPost()">ポストする</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline" id="timelineList">
+                    <div class="tweet" data-tweet-id="sample-1">
+                        <div class="tweet-main">
+                            <div class="avatar"></div>
+                            <div class="tweet-content">
+                                <div class="tweet-user-info">
+                                    <span class="screen-name">ユーザーネーム</span>
+                                    <span class="user-id">@youser_test</span>
+                                    <span class="tweet-time">· 5分</span>
+                                </div>
+                                <p class="tweet-text">画面右下に追従する丸いポストボタンを設置しました！タップすると一番上の投稿エリアへ瞬時にスクロールし、フォーカスされます。</p>
+                                <div class="tweet-actions">
+                                    <span class="action-item" onclick="toggleReplies(this)"><i class="fa-regular fa-comment"></i> <span class="count">0</span></span>
+                                    <span class="action-item" onclick="repostTweet(this)"><i class="fa-solid fa-retweet"></i> <span class="count">0</span></span>
+                                    <span class="action-item" onclick="toggleTweetBookmark(this)"><i class="fa-regular fa-bookmark"></i> <span class="count">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="replies-container" style="display:none;">
+                            <div class="reply-list">
+                                <div class="reply-item">
+                                    <div class="reply-avatar"></div>
+                                    <div class="reply-body">
+                                        <div class="reply-user"><span class="screen-name">一般ユーザーA</span> <span class="user-id" style="font-size:11px;">@user_a</span></div>
+                                        <div class="reply-text">これめちゃくちゃ便利ですね！別のHTMLページに飛ばすのもスムーズで使いやすいです。</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="reply-form">
+                                <input type="text" class="reply-input" placeholder="返信をポスト…">
+                                <button class="reply-submit-btn" onclick="submitReply(this)">返信</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tweet" style="min-height: 200px; padding-top: 40px; color: #536471;">（スクロールテストエリア）</div>
+                    <div class="tweet" style="min-height: 200px; color: #536471;">（タイムライン最下部）</div>
+                </div>
+                
+                <a href="ツイート.html" class="floating-post-btn" id="floatingPostBtn" title="ポストする">
+                    <i class="fa-solid fa-feather-pointed"></i>
+                </a>
+            </div>
+
+            <div id="videoSection" class="content-section">
+                <div class="video-feed" id="videoFeed">
+                    
+                    <div class="video-card" data-video-id="video-1">
+                        <div class="video-placeholder" style="background: linear-gradient(180deg, #1c9bf0, #000000);">
+                            <i class="fa-solid fa-play" style="font-size: 40px; margin-bottom: 10px; opacity: 0.7;"></i>
+                            <span>[ おすすめ動画 1 ]</span>
+                        </div>
+                        
+                        <div class="video-time-counter">
+                            <i class="fa-regular fa-clock"></i> <span class="time-value">05:23</span>
+                        </div>
+            
+                        <div class="video-left-shop">
+                            <a href="EC3.html" class="v-shop-btn">
+                                <i class="fa-solid fa-bag-shopping"></i>
+                                <span>ショップ</span>
+                            </a>
+                        </div>
+            
+                        <div class="video-info-overlay">
+                            <div class="video-user">@creative_tech</div>
+                            <div class="video-desc">HTML/CSSで作る次世代のUIデザイン。縦スクロールのフィット感が抜群。 #webdesign</div>
+                            <div class="video-music"><i class="fa-solid fa-music"></i> Lo-Fi Coding Beats</div>
+                        </div>
+                        
+                        <div class="video-actions-overlay">
+                            <div class="v-action-item" onclick="toggleVideoBookmark(this)"><i class="fa-regular fa-bookmark"></i><span>0</span></div>
+                            <div class="v-action-item" onclick="toggleVideoReplies(this)"><i class="fa-solid fa-comment-dots"></i><span>0</span></div>
+                            <div class="v-action-item"><i class="fa-solid fa-gift"></i><span>0</span></div>
+                        </div>
+            
+                        <div class="v-replies-container" style="display:none;">
+                            <div class="v-replies-header">
+                                <span>コメント</span>
+                                <button class="v-replies-close" onclick="toggleVideoReplies(this)"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                            
+                            <div class="v-reply-list"></div>
+                            
+                            <div class="v-reply-form">
+                                <input type="text" class="v-reply-input" placeholder="コメントを入力…">
+                                <button class="v-reply-submit-btn" onclick="submitVideoReply(this)">送信</button>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div class="video-card" data-video-id="video-2">
+                        <div class="video-placeholder" style="background: linear-gradient(180deg, #e11d48, #000000);">
+                            <i class="fa-solid fa-play" style="font-size: 40px; margin-bottom: 10px; opacity: 0.7;"></i>
+                            <span>[ おすすめ動画 2 ]</span>
+                        </div>
+                        
+                        <div class="video-time-counter">
+                            <i class="fa-regular fa-clock"></i> <span class="time-value">12:45</span>
+                        </div>
+            
+                        <div class="video-left-shop">
+                            <a href="EC3.html" class="v-shop-btn">
+                                <i class="fa-solid fa-bag-shopping"></i>
+                                <span>ショップ</span>
+                            </a>
+                        </div>
+            
+                        <div class="video-info-overlay">
+                            <div class="video-user">@creative_tech</div>
+                            <div class="video-desc">HTML/CSSで作る次世代のUIデザイン。縦スクロールのフィット感が抜群。 #webdesign</div>
+                            <div class="video-music"><i class="fa-solid fa-music"></i> Lo-Fi Coding Beats</div>
+                        </div>
+                        
+                        <div class="video-actions-overlay">
+                            <div class="v-action-item" onclick="toggleVideoBookmark(this)"><i class="fa-regular fa-bookmark"></i><span>0</span></div>
+                            <div class="v-action-item" onclick="toggleVideoReplies(this)"><i class="fa-solid fa-comment-dots"></i><span>0</span></div>
+                            <div class="v-action-item"><i class="fa-solid fa-gift"></i><span>0</span></div>
+                        </div>
+            
+                        <div class="v-replies-container" style="display:none;">
+                            <div class="v-replies-header">
+                                <span>コメント</span>
+                                <button class="v-replies-close" onclick="toggleVideoReplies(this)"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                            
+                            <div class="v-reply-list"></div>
+                            
+                            <div class="v-reply-form">
+                                <input type="text" class="v-reply-input" placeholder="コメントを入力…">
+                                <button class="v-reply-submit-btn" onclick="submitVideoReply(this)">送信</button>
+                            </div>
+                        </div>
+                    </div>
+            
+                </div>
+            </div>
+
+        </main>
+
+        <aside class="right-sidebar">
+            <div class="dummy-trends">
+                <h3>いまどうしてる？</h3>
+                <li class="trend-item">
+                    <div class="trend-category">テクノロジー ・ トレンド</div>
+                    <div class="trend-name">#ノーコードWEB制作</div>
+                </li>
+            </div>
+        </aside>
+    </div>
+
+    <nav class="bottom-nav" id="bottomNav">
+        <a href="#" class="bottom-nav-item active" id="btnHome" onclick="switchMainTab('timeline')">
+            <i class="fa-solid fa-house"></i>
+            <span>ホーム</span>
+        </a>
+        <a href="リンクリンカー.html" class="bottom-nav-item" id="btnSearch">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>検索</span>
+        </a>
+        <a href="ライブ.html" class="bottom-nav-item" id="btnVideo" onclick="switchMainTab('video')">
+            <i class="fa-solid fa-video"></i>
+            <span>ライブ</span>
+        </a>
+        <a href="EC3.html" class="bottom-nav-item" id="btnShop">
+            <i class="fa-solid fa-basket-shopping"></i>
+            <span>ショップ</span>
+        </a>
+        <a href="企業.html" class="bottom-nav-item" id="btnCompany">
+            <i class="fa-solid fa-building"></i>
+            <span>企業</span>
+        </a>
+        <a href="通知とDM.html" class="bottom-nav-item" id="btnDM">
+            <i class="fa-solid fa-envelope"></i>
+            <span>通知とDM</span>
+        </a>
+    </nav>
+
+    <footer class="footer-copyright">
+        &copy; 2026 New World. All Rights Reserved.
+    </footer>
+
+    <script src="ニューワールド.js"></script>
+
+
+
+    <script>
+        // ブラウザがService Workerをサポートしているか確認
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+              .then((registration) => {
+                console.log('Service Worker 登録成功！スコープ:', registration.scope);
+              })
+              .catch((error) => {
+                console.log('Service Worker 登録失敗:', error);
+              });
+          });
+        }
+      </script>
+
+
+
+</body>
+</html>
+
+
+
+
