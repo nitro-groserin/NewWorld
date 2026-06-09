@@ -1,3 +1,18 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "New World",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "New World",
+  "start_url": "/https://nitro-groserin.github.io/NewWorld/",
+  "theme_color": "#ffffff",
+  "description": "New World",
+  "lang": "ja",
+  "id": "New World"
+}
+
 
 
 
