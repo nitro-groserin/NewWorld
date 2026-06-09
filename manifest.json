@@ -13,12 +13,12 @@
   "id": "New World",
   "icons": [
   {
-    "src": "icon-192.png",
+    "src": "New_World_192.png",
     "sizes": "192x192",
     "type": "image/png"
   },
   {
-    "src": "icon-512.png",
+    "src": "New_World_512.png",
     "sizes": "512x512",
     "type": "image/png"
   }
