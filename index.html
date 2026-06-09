@@ -575,37 +575,70 @@
     ];
 
     // ログイン処理
-    function handleSubmit(event) {
-        event.preventDefault();
-        
-        // 各種要素の取得
-        const usernameInput = document.getElementById('username').value;
-        const errorElement = document.getElementById('usernameError');
-        const submitBtn = document.getElementById('submitBtn');
-        
-        // いったんエラー表示をクリアする
-        errorElement.textContent = '';
-        errorElement.style.display = 'none';
-        
-        // 入力禁止ワードのチェック
-        const lowercaseInput = usernameInput.toLowerCase();
-        const foundWord = forbiddenWords.find(word => lowercaseInput.includes(word.toLowerCase()));
 
-        if (foundWord) {
-            // 禁止ワードが含まれていた場合、赤文字でエラー表示をして処理を中断
-            errorElement.textContent = `ユーザー名に利用できないワード（${foundWord}）が含まれています。ログインできません。`;
-            errorElement.style.display = 'block';
-            return; 
-        }
 
-        // 禁止ワードがない場合、多重クリック防止のためにボタンを無効化して決済ページへ遷移
-        submitBtn.disabled = true;
-        submitBtn.textContent = '決済画面へ移動中...';
 
-        // 決済リンクURLへリダイレクト
-        window.location.href = config.paymentUrl;
+
+
+    
+
+function handleSubmit(event) {
+    event.preventDefault();
+
+    // 各種要素の取得
+    const usernameInput = document.getElementById('username').value.trim();
+    const errorElement = document.getElementById('usernameError');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // いったんエラー表示をクリアする
+    errorElement.textContent = '';
+    errorElement.style.display = 'none';
+
+    // ============================
+    // フリーパス（試運転用）
+    // ============================
+    if (usernameInput === '反社スレイヤー') {
+        // ログイン成功後のページへ移動
+        // 必要に応じて変更してください。
+        window.location.href = "home.html";
+        return;
     }
 
+    // 入力禁止ワードのチェック
+    const lowercaseInput = usernameInput.toLowerCase();
+    const foundWord = forbiddenWords.find(word =>
+        lowercaseInput.includes(word.toLowerCase())
+    );
+
+    if (foundWord) {
+        errorElement.textContent =
+            `ユーザー名に利用できないワード（${foundWord}）が含まれています。ログインできません。`;
+        errorElement.style.display = 'block';
+        return;
+    }
+
+    // 禁止ワードがない場合、多重クリック防止のためにボタンを無効化
+    submitBtn.disabled = true;
+    submitBtn.textContent = '決済画面へ移動中...';
+
+    // 決済ページへ移動
+    window.location.href = config.paymentUrl;
+}
+
+
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
     // パスワードの表示/非表示切り替え処理
     function togglePasswordVisibility() {
         const passwordInput = document.getElementById('password');
