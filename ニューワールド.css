@@ -720,4 +720,75 @@ body {
 
 
 
+/* ==========================================================================
+   スクロールを有効にするための必須設定
+   ========================================================================== */
 
+/* 1. 画面全体のスクロールを許可する（もし hidden になっていたら上書き） */
+html, body {
+    height: auto;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto; /* 縦スクロールを絶対に許可する */
+    background-color: #ffffff; /* 必要に応じて背景色を調整 */
+}
+
+/* 2. メインコンテナの高さ制限を解除 */
+.container {
+    display: flex;
+    width: 100%;
+    max-width: 1200px; /* レイアウトに合わせた最大幅 */
+    margin: 0 auto;
+    min-height: 100vh;
+}
+
+/* 3. メインコンテンツエリアの調整 */
+.main-content {
+    flex: 1;
+    max-width: 600px; /* タイムラインの一般的な幅 */
+    border-left: 1px solid #eff3f4;
+    border-right: 1px solid #eff3f4;
+    padding-bottom: 80px; /* ★最重要: 下部ナビゲーション(bottom-nav)に被らないための余白 */
+    min-height: 100vh;
+}
+
+/* 4. 各セクションの表示切り替え */
+.content-section {
+    display: none;
+    width: 100%;
+}
+
+.content-section.active {
+    display: block; /* アクティブなセクションを表示 */
+    height: auto;
+}
+
+/* 5. タイムライン全体のラップ */
+.timeline {
+    width: 100%;
+    height: auto;
+    overflow-y: visible; /* 親要素のスクロールに任せる */
+}
+
+/* ==========================================================================
+   （参考）下部ナビゲーションとフッターの配置調整
+   ========================================================================== */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    /* 背景色や高さをCSS側で適宜設定してください */
+}
+
+/* フッターがある場合、タイムラインの最下部で見えるように設定 */
+.footer-copyright {
+    text-align: center;
+    padding: 20px;
+    color: #536471;
+    font-size: 12px;
+    background: #ffffff;
+    border-top: 1px solid #eff3f4;
+    margin-bottom: 60px; /* スマホ用ナビゲーションの高さ分浮かせる */
+}
