@@ -75,6 +75,9 @@ const BANNED_WORDS = [
     'https://hikari.rakuten.co.jp/',
     'https://tv.rakuten.co.jp/',
     'https://www.rakutenid.com/eagles/',
+    'https://www.kohnan-eshop.com/shop/',
+    'https://www.kohnan-eshop.com/',
+    
 
 
 
