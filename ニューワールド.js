@@ -77,6 +77,9 @@ const BANNED_WORDS = [
     'https://www.rakutenid.com/eagles/',
     'https://www.kohnan-eshop.com/shop/',
     'https://www.kohnan-eshop.com/',
+    '電気',
+    '電力',
+    '解体業',
     
 
 
