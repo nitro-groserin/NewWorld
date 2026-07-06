@@ -83,6 +83,10 @@ const BANNED_WORDS = [
     'エアコン',
     '冷凍庫',
     'クーラー',
+    'アライフーズ',
+    '株式会社アライフーズ',
+    'ラーメン福',
+    'https://www.ra-menfuku.com/company/',
     
 
 
