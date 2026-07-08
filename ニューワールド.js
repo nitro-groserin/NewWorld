@@ -87,6 +87,9 @@ const BANNED_WORDS = [
     '株式会社アライフーズ',
     'ラーメン福',
     'https://www.ra-menfuku.com/company/',
+    'カメラ',
+    'コン',
+    '室外機',
     
 
 
