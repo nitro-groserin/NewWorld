@@ -100,6 +100,9 @@ const BANNED_WORDS = [
         '電波',
         '周波数',
         'Sunwave',
+    'ユアサ商事',
+        '株式会社YUASA',
+        'https://www.yuasa.co.jp/',
 
 
 
