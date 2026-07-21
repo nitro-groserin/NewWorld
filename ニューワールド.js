@@ -105,6 +105,12 @@ const BANNED_WORDS = [
         'https://www.yuasa.co.jp/',
     'ユアサ',
         '株式会社ユアサ',
+    'INDEED',
+        'indeed',
+        'インディード',
+        'いんでぃーど',
+        'https://jp.indeed.com/m/',
+        'Indeed',
 
 
 
