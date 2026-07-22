@@ -11,6 +11,8 @@
   "description": "New World",
   "lang": "ja",
   "id": "New World",
+  "targetSdkVersion": 36,
+
   "icons": [
   {
     "src": "New_World_192.png",
