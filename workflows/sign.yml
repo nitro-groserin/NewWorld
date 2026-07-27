@@ -1,4 +1,4 @@
-name: Sign AAB
+Name: Sign AAB
 
 on:
   workflow_dispatch:
@@ -16,21 +16,20 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Restore Permanent Keystore & Sign AAB
+      # Secretsから固定の鍵ファイルを復元する
+      - name: Restore Keystore File
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > release.keystore
+
+      # 固定の鍵を使って署名する
+      - name: Sign AAB
         env:
           STORE_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASS: ${{ secrets.KEY_PASSWORD }}
-          SEED: ${{ secrets.BUILD_SECRET_SEED }}
         run: |
-          # 登録したSEED情報等を元に、常に完全同一の決定論的鍵（Deterministic Key）を固定生成します
-          keytool -genkeypair -v -keystore release.keystore \
-            -alias "$KEY_ALIAS" -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass "$STORE_PASS" -keypass "$KEY_PASS" \
-            -dname "CN=Android Developer, OU=Dev, O=App, L=City, S=State, C=JP" \
-            -providername SUN
-
-          # AABファイルへ署名
           jarsigner -keystore release.keystore \
             -storepass "$STORE_PASS" -keypass "$KEY_PASS" \
             -sigalg SHA256withRSA -digestalg SHA-256 \
@@ -43,6 +42,3 @@ jobs:
         with:
           name: signed-aab-package
           path: app-release-signed.aab
-
-
-
