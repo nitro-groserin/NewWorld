@@ -125,6 +125,7 @@ const BANNED_WORDS = [
         'MG 脇',
         'チバニャン',
     '建築家',
+    'https://www.shimz.co.jp/',
 
 
 
