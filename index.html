@@ -23,6 +23,8 @@ body {
     overflow-y: auto; 
     padding: 20px 0; /* スマホで上下に余裕を持たせる */
     box-sizing: border-box;
+    display:　flex
+    ;
 }
 
 /* --- ログインコンテナの修正 --- */
@@ -390,23 +392,12 @@ body {
         }
 
 
-        /* 中央寄せはラッパーで行う */
-.wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 20px 0;
-    box-sizing: border-box;
-    width: 100%;
-}
     </style>
 </head>
 <body>
 
 <button class="modal-trigger-btn" onclick="openModal()">利用規約<br>特定商取引法</button>
 
-    <div class="wrapper">
         <div class="login-container">
             <h2>ログイン</h2>
             <div class="notice-badge">初回ログインには、ドレスコードが必要です。
