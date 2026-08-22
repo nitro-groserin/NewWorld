@@ -35,8 +35,7 @@ body {
     
     /* width: 350px を以下のように変更 */
     width: 90%;          /* 画面幅の90%にする */
-    max-width: 450px;    /* ただし最大でも350pxを超えない */
-    height:200px;
+    max-width: 350px;    /* ただし最大でも350pxを超えない */
     box-sizing: border-box;
     text-align: center;
     z-index: 1;
@@ -389,6 +388,16 @@ body {
             color: #666;
         }
 
+/* 中央寄せはラッパーで行う */
+.wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px 0;
+    box-sizing: border-box;
+    width: 100%;
+}
 
     </style>
 </head>
@@ -396,6 +405,7 @@ body {
 
 <button class="modal-trigger-btn" onclick="openModal()">利用規約<br>特定商取引法</button>
 
+    <div class="wrapper">
         <div class="login-container">
             <h2>ログイン</h2>
             <div class="notice-badge">初回ログインには、ドレスコードが必要です。
@@ -422,6 +432,7 @@ body {
             本システムへの初回ログイン時のみ、<br>
             <strong>初期費用 500円（税込）</strong> の決済が必要です。
         </div>
+    </div>
 
         <button type="submit" id="submitBtn" class="login-btn">500円を支払ってログイン</button>
     </form>
