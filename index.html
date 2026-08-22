@@ -395,11 +395,11 @@ body {
 
 <button class="modal-trigger-btn" onclick="openModal()">利用規約<br>特定商取引法</button>
 
-        <div class="login-container">
-            <h2>ログイン</h2>
-            <div class="notice-badge">初回ログインには、ドレスコードが必要です。
-        ※初回ログイン以降のドレスコードは、必要ありません。
-            </div>
+<div class="login-container">
+    <h2>ログイン</h2>
+    <div class="notice-badge">
+        ※初回ログイン時のみ、初期費用 500円（税込）の決済が必要です。
+    </div>
 
     <form onsubmit="handleSubmit(event)">
         <div class="input-group">
@@ -412,24 +412,26 @@ body {
             <label for="password">パスワード</label>
             <div class="password-wrapper">
                 <input type="password" id="password" placeholder="••••••••" required>
-                <button type="button" class="toggle-password" id="togglePassword" onclick="togglePasswordVisibility()">👁️</button>
+                <button type="button" class="toggle-password" id="togglePassword" onclick="togglePasswordVisibility()" aria-label="パスワードの表示切替">👁️</button>
             </div>
         </div>
 
         <div class="fee-info">
             <strong>【ご案内】</strong><br>
-            本システムへの初回ログイン時のみ、<br>
-            <strong>初期費用 500円（税込）</strong> の決済が必要です。
+            初回ログイン完了後、お支払い画面へ移動します。
         </div>
-    </div>
 
-        <button type="submit" id="submitBtn" class="login-btn">500円を支払ってログイン</button>
+        <button type="submit" id="submitBtn" class="login-btn">次へ進む</button>
     </form>
 
     <div class="footer-text">
         ※2回目以降のログインに費用はかかりません。
     </div>
+</div>
 
+    
+
+      
 
 <div class="modal-overlay" id="termsModal" onclick="closeModalOutside(event)">
     <div class="modal-content">
