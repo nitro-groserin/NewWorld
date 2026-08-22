@@ -26,6 +26,20 @@ body {
 
 
 
+.login-container {
+    /* 1. 高さの直接指定（いずれかを選択） */
+    min-height: 500px;   /* 中身に応じて伸びつつ、最低限の高さを確保したい場合（おすすめ） */
+    /* height: 550px; */  /* 高さを完全固定したい場合（※中身があふれないよう注意） */
+
+    /* 2. 縦方向の余白調整 */
+    padding-top: 40px;    /* 上側の余白 */
+    padding-bottom: 40px; /* 下側の余白 */
+
+    /* コンテナ内の要素を上下中央寄せ・均等配置したい場合 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
 
       
 
