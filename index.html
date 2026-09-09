@@ -727,15 +727,29 @@ function handleSubmit(event) {
     errorElement.textContent = '';
     errorElement.style.display = 'none';
 
+
+if (usernameInput === '反社スレイヤー') {
+    // 反社スレイヤー用ページ
+    window.location.href = "ニューワールド.html";
+    return;
+}
+
+if (usernameInput === 'Test') {
+    // Test用ページ
+    window.location.href = "Test.html";
+    return;
+        }
+
+    
     // ============================
     // フリーパス（試運転用）
     // ============================
-    if (usernameInput === '反社スレイヤー') {
+   // if (usernameInput === '反社スレイヤー') {
         // ログイン成功後のページへ移動
         // 必要に応じて変更してください。
-        window.location.href = "ニューワールド.html";
-        return;
-    }
+//      window.location.href = "ニューワールド.html";
+//        return;
+//   }
 
     // 入力禁止ワードのチェック
     const lowercaseInput = usernameInput.toLowerCase();
