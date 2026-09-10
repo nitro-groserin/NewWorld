@@ -126,6 +126,7 @@ const BANNED_WORDS = [
         'チバニャン',
     '建築家',
     'https://www.shimz.co.jp/',
+    'エンジニア',
 
 
 
