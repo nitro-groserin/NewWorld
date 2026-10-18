@@ -1,0 +1,763 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>New World ログイン</title>
+
+    <link rel="manifest" href="manifest.json">
+
+    <style>
+        /* ==============================
+           基本レイアウト
+        ============================== */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 80px 16px 30px;
+            color: #fff;
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* ==============================
+           ログインコンテナ
+        ============================== */
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+
+            width: 100%;
+            max-width: 400px;
+            min-height: 500px;
+
+            padding: 30px 20px;
+            margin: auto;
+
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+
+        /* ==============================
+           お知らせバッジ
+        ============================== */
+
+        .notice-badge {
+            display: inline-block;
+            background-color: #ff4757;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* ==============================
+           入力欄
+        ============================== */
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        input {
+            display: block;
+            width: 100%;
+            padding: 12px;
+
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+
+            color: white;
+            font-size: 14px;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        input::placeholder {
+            color: #aaa;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #00adb5;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* ==============================
+           パスワード入力欄
+        ============================== */
+
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper input {
+            padding-right: 48px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 5px;
+            background: transparent;
+            border: none;
+
+            color: #aaa;
+            font-size: 18px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toggle-password:hover {
+            color: #00adb5;
+        }
+
+        /* ==============================
+           エラーメッセージ
+        ============================== */
+
+        .error-message {
+            display: none;
+            margin-top: 5px;
+            color: #ff4757;
+            font-size: 12px;
+            font-weight: bold;
+            overflow-wrap: anywhere;
+        }
+
+        /* ==============================
+           初回決済の案内
+        ============================== */
+
+        .fee-info {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px dashed #ff4757;
+            border-radius: 8px;
+
+            padding: 12px;
+            margin-bottom: 25px;
+
+            font-size: 13px;
+            color: #ff6b81;
+            line-height: 1.7;
+            text-align: left;
+        }
+
+        /* ==============================
+           ログインボタン
+        ============================== */
+
+        .login-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+
+            background: linear-gradient(90deg, #00adb5, #007880);
+            border: none;
+            border-radius: 8px;
+
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+
+            cursor: pointer;
+            transition: filter 0.3s, box-shadow 0.3s;
+        }
+
+        .login-btn:hover {
+            filter: brightness(1.2);
+            box-shadow: 0 0 15px rgba(0, 173, 181, 0.4);
+        }
+
+        .login-btn:disabled {
+            background: #555;
+            color: #aaa;
+            cursor: not-allowed;
+            box-shadow: none;
+            filter: none;
+        }
+
+        /* ==============================
+           フッター文字
+        ============================== */
+
+        .footer-text {
+            margin-top: 20px;
+            font-size: 11px;
+            color: #aaa;
+            line-height: 1.7;
+        }
+
+        /* ==============================
+           利用規約ボタン
+           モーダル関連の配置は統一
+        ============================== */
+
+        .modal-trigger-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 50;
+
+            padding: 8px 12px;
+
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+
+            font-size: 12px;
+            line-height: 1.6;
+            text-align: center;
+
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .modal-trigger-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #00adb5;
+        }
+
+        /* ==============================
+           スマートフォン対応
+        ============================== */
+
+        @media (max-width: 480px) {
+            body {
+                padding: 70px 12px 24px;
+                align-items: flex-start;
+            }
+
+            .login-container {
+                min-height: 0;
+                padding: 25px 18px;
+            }
+
+            h2 {
+                font-size: 22px;
+            }
+
+            .notice-badge {
+                font-size: 11px;
+                line-height: 1.7;
+            }
+
+            .modal-trigger-btn {
+                top: 10px;
+                left: 10px;
+                padding: 6px 9px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ==============================
+         ログイン画面
+    ============================== -->
+
+    <main class="login-container">
+
+        <h2>ログイン</h2>
+
+        <div class="notice-badge">
+            ※初回ログイン時のみ、初期費用500円（税込）の決済が必要です。
+        </div>
+
+        <form id="loginForm" onsubmit="handleSubmit(event)">
+
+            <!-- ユーザー名 -->
+            <div class="input-group">
+
+                <label for="username">
+                    ユーザー名 / メールアドレス
+                </label>
+
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="example@domain.com"
+                    autocomplete="username"
+                    required
+                >
+
+                <div
+                    id="usernameError"
+                    class="error-message"
+                    role="alert"
+                    aria-live="polite"
+                ></div>
+
+            </div>
+
+            <!-- パスワード -->
+            <div class="input-group">
+
+                <label for="password">パスワード</label>
+
+                <div class="password-wrapper">
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="パスワードを入力"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="toggle-password"
+                        id="togglePassword"
+                        onclick="togglePasswordVisibility()"
+                        aria-label="パスワードを表示"
+                        aria-pressed="false"
+                    >
+                        👁️
+                    </button>
+
+                </div>
+
+                <div
+                    id="passwordError"
+                    class="error-message"
+                    role="alert"
+                    aria-live="polite"
+                ></div>
+
+            </div>
+
+            <!-- 初回決済案内 -->
+            <div class="fee-info">
+                <strong>【ご案内】</strong><br>
+                初回ログイン完了後、お支払い画面へ移動します。
+            </div>
+
+            <!-- 送信ボタン -->
+            <button
+                type="submit"
+                id="submitBtn"
+                class="login-btn"
+            >
+                次へ進む
+            </button>
+
+        </form>
+
+        <div class="footer-text">
+            ※2回目以降のログインに費用はかかりません。
+        </div>
+
+    </main>
+
+    <!-- ==============================
+         パスワード表示切り替え
+    ============================== -->
+
+    <script>
+        function togglePasswordVisibility() {
+            const passwordInput =
+                document.getElementById("password");
+
+            const toggleButton =
+                document.getElementById("togglePassword");
+
+            if (!passwordInput || !toggleButton) {
+                return;
+            }
+
+            const isHidden =
+                passwordInput.type === "password";
+
+            passwordInput.type =
+                isHidden ? "text" : "password";
+
+            toggleButton.textContent =
+                isHidden ? "🙈" : "👁️";
+
+            toggleButton.setAttribute(
+                "aria-label",
+                isHidden
+                    ? "パスワードを非表示"
+                    : "パスワードを表示"
+            );
+
+            toggleButton.setAttribute(
+                "aria-pressed",
+                String(isHidden)
+            );
+        }
+    </script>
+
+    <!--
+        パート①はここまでです。
+
+        次のパート②では、
+        利用規約モーダル本体と
+        プライバシーポリシー全文を追加します。
+
+        この時点では、まだHTMLは完成していません。
+    -->
+
+  
+<!-- ====================================== -->
+<!-- パート②：利用規約モーダル本体 -->
+<!-- ====================================== -->
+
+<!-- 利用規約を開くボタン -->
+<button
+    type="button"
+    class="modal-trigger-btn"
+    id="openTermsModal"
+    aria-haspopup="dialog"
+    aria-controls="termsModal"
+>
+    利用規約・各種ポリシー
+</button>
+
+<!-- 規約表示モーダル -->
+<div
+    id="termsModal"
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modalTitle"
+    aria-hidden="true"
+>
+    <div class="modal-content">
+
+        <!-- モーダルヘッダー -->
+        <div class="modal-header">
+
+            <h2 id="modalTitle">
+                利用規約・各種ポリシー
+            </h2>
+
+            <button
+                type="button"
+                class="modal-close"
+                id="closeTermsModal"
+                aria-label="閉じる"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <!--
+            規約本文はすべてこの中に配置します。
+            パート③・④の内容も、この要素の中に追加します。
+        -->
+        <div class="modal-body" id="modalBody">
+
+            <!-- ====================================== -->
+            <!-- 第2回：プライバシーポリシー -->
+            <!-- ====================================== -->
+
+            <section class="privacy-policy">
+
+                <h1>プライバシーポリシー</h1>
+
+                <p>
+                    本プライバシーポリシーは、アプリ「Mew World」
+                    （以下「本アプリ」といいます）における、
+                    ユーザーの個人情報および関連データの取り扱いについて定めるものです。
+                </p>
+
+                <h2>第1条（アプリ名および開発者情報）</h2>
+
+                <div class="info-box">
+                    <p><strong>アプリ名：</strong>Mew World</p>
+                    <p><strong>開発者名：</strong>たろミュウゾー</p>
+                    <p>
+                        <strong>お問い合わせ先：</strong>
+                        <a href="mailto:taromyuuzo@gmail.com">
+                            taromyuuzo@gmail.com
+                        </a>
+                    </p>
+                </div>
+
+                <h2>第2条（取得する情報）</h2>
+
+                <p>
+                    本アプリでは、サービスおよび機能の提供に必要な範囲で、
+                    以下の情報を取得する場合があります。
+                </p>
+
+                <ul>
+                    <li>ユーザーが入力または送信した情報</li>
+                    <li>アカウントの登録および認証に必要な情報</li>
+                    <li>GPS等を利用して取得する位置情報</li>
+                    <li>端末、OSおよびアプリの利用に関する情報</li>
+                    <li>エラー情報、アクセス記録その他の動作情報</li>
+                    <li>お問い合わせの際にユーザーから提供された情報</li>
+                    <li>決済処理や利用状況の確認に必要な情報</li>
+                </ul>
+
+                <p>
+                    実際に取得する情報は、本アプリの機能、利用状況、
+                    端末の設定およびユーザーの許可によって異なります。
+                </p>
+
+                <p>
+                    位置情報など、端末の権限を必要とする情報については、
+                    必要な許可を得たうえで利用します。
+                </p>
+
+                <p>
+                    本アプリで取得していない情報を、
+                    取得しているものとして取り扱うことはありません。
+                </p>
+
+                <h2>第3条（情報の利用目的）</h2>
+
+                <p>
+                    取得した情報は、以下の目的で利用します。
+                </p>
+
+                <ul>
+                    <li>本アプリおよび関連サービスの提供</li>
+                    <li>ユーザーの本人確認およびアカウント管理</li>
+                    <li>位置情報を利用する機能の提供</li>
+                    <li>利用料金の決済および支払い状況の確認</li>
+                    <li>お問い合わせやサポートへの対応</li>
+                    <li>不正利用の防止およびセキュリティの確保</li>
+                    <li>不具合の調査、修正およびサービスの品質向上</li>
+                    <li>法令上必要な対応</li>
+                </ul>
+
+                <p>
+                    取得した情報は、利用目的の達成に必要な範囲で取り扱います。
+                    利用目的を変更する場合は、法令に従って適切に対応します。
+                </p>
+
+                <h2>第4条（位置情報の取り扱い）</h2>
+
+                <p>
+                    本アプリでは、位置情報を利用する機能を提供する場合があります。
+                </p>
+
+                <p>
+                    位置情報は、当該機能の提供など、必要な目的のために利用します。
+                    位置情報へのアクセスは、端末の設定やユーザーの許可状況に
+                    応じて制限されます。
+                </p>
+
+                <p>
+                    ユーザーは、端末の設定から位置情報の利用許可を変更できます。
+                    ただし、許可を無効にした場合、一部の機能が利用できなくなる
+                    ことがあります。
+                </p>
+
+                <p>
+                    位置情報を保存する場合や外部サービスへ送信する場合は、
+                    実際の機能およびデータの取り扱いに応じて適切に対応します。
+                </p>
+
+                <h2>第5条（第三者への提供および外部サービス）</h2>
+
+                <p>
+                    本アプリでは、法令に基づく場合などを除き、
+                    個人情報を本人の同意なく第三者に提供しないよう、
+                    法令に従って適切に取り扱います。
+                </p>
+
+                <p>
+                    ただし、本アプリの機能を提供するため、
+                    認証、データ保存、決済、分析その他の外部サービスを
+                    利用する場合があります。
+                </p>
+
+                <p>
+                    外部サービスを利用する場合、サービスの提供に必要な情報が
+                    当該事業者に送信されることがあります。
+                    その場合は、利用するサービスの内容やデータの取り扱いに応じて、
+                    必要な情報の開示および適切な管理に努めます。
+                </p>
+
+                <p>
+                    外部サービスの利用状況や提供先については、
+                    実際の実装に合わせて本ポリシーまたは関連ページに記載します。
+                </p>
+
+                <h2>第6条（情報の安全管理）</h2>
+
+                <p>
+                    取得した情報について、不正アクセス、漏えい、紛失、
+                    改ざんなどを防止するため、情報の種類や利用状況に応じた
+                    適切な安全管理措置を講じるよう努めます。
+                </p>
+
+                <p>
+                    また、情報を取り扱う外部サービスについても、
+                    サービスの内容や契約条件などを確認し、適切な管理に努めます。
+                </p>
+
+                <h2>第7条（情報の保存および削除）</h2>
+
+                <p>
+                    取得した情報は、利用目的の達成に必要な期間保存します。
+                </p>
+
+                <p>
+                    保存する必要がなくなった情報については、
+                    法令上保存が必要な場合などを除き、
+                    適切な方法で削除するよう努めます。
+                </p>
+
+                <p>
+                    ユーザーが自身の情報の確認、訂正または削除を希望する場合は、
+                    下記のお問い合わせ先までご連絡ください。
+                </p>
+
+                <p>
+                    なお、削除の対象や方法については、
+                    法令上の義務、本人確認の必要性および利用する外部サービスの
+                    仕様などに応じて対応します。
+                </p>
+
+                <h2>第8条（ユーザーの責任）</h2>
+
+                <p>
+                    ユーザーは、本アプリを利用するにあたり、
+                    他人の個人情報やプライバシーを不当に侵害しないものとします。
+                </p>
+
+                <p>
+                    また、第三者の情報を本アプリに入力または送信する場合は、
+                    法令および本アプリの利用規約を遵守するものとします。
+                </p>
+
+                <h2>第9条（プライバシーポリシーの変更）</h2>
+
+                <p>
+                    本ポリシーは、法令の改正、本アプリの機能変更、
+                    外部サービスの変更などに応じて改定する場合があります。
+                </p>
+
+                <p>
+                    変更後のプライバシーポリシーは、本アプリまたは
+                    本アプリに関連するウェブページに掲載します。
+                    重要な変更については、必要に応じて適切な方法でお知らせします。
+                </p>
+
+                <h2>第10条（お問い合わせ先）</h2>
+
+                <div class="info-box">
+
+                    <p>
+                        本アプリにおける個人情報およびデータの取り扱いに関する
+                        お問い合わせは、以下までご連絡ください。
+                    </p>
+
+                    <p>
+                        <strong>開発者名：</strong>たろミュウゾー
+                    </p>
+
+                    <p>
+                        <strong>メールアドレス：</strong>
+                        <a href="mailto:taromyuuzo@gmail.com">
+                            taromyuuzo@gmail.com
+                        </a>
+                    </p>
+
+                </div>
+
+            </section>
+
+            <!-- パート③の内容は、この下に追加します -->
+
+        </div>
+
+        <!-- モーダルフッター -->
+        <div class="modal-footer">
+
+            <button
+                type="button"
+                class="modal-close-btn"
+                id="closeTermsModalFooter"
+            >
+                閉じる
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- ====================================== -->
+<!-- パート②ここまで -->
+<!-- ====================================== -->
+
+
+  
+
+  
+</body>
+</html>
