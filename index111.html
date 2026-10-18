@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New World ログイン</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* height: 100vh; から min-height に変更 */
+    min-height: 100vh; 
+    margin: 0;
+    color: #fff;
+    position: relative;
+    /* overflow: hidden を削除または auto に（縦スクロールを許可） */
+    overflow-y: auto; 
+    padding: 20px 0; /* スマホで上下に余裕を持たせる */
+    box-sizing: border-box;
+}
+
+
+
+.login-container {
+    /* 1. 高さの直接指定（いずれかを選択） */
+    min-height: 500px;   /* 中身に応じて伸びつつ、最低限の高さを確保したい場合（おすすめ） */
+    /* height: 550px; */  /* 高さを完全固定したい場合（※中身があふれないよう注意） */
+
+    /* 2. 縦方向の余白調整 */
+    padding-top: 40px;    /* 上側の余白 */
+    padding-bottom: 40px; /* 下側の余白 */
+
+    /* コンテナ内の要素を上下中央寄せ・均等配置したい場合 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+      
+
+        
+/* --- ログインコンテナの修正 --- */
+.login-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 30px 20px; /* パディングを少し小さく調整 */
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    
+    /* width: 350px を以下のように変更 */
+    width: 100%;          /* 画面幅の90%にする */
+    max-width: 400px;    /* ただし最大でも350pxを超えない */
+    box-sizing: border-box;
+    text-align: center;
+    z-index: 1;
+    margin: auto;
+    padding: 20px;
+}
+        
+
+/* --- 左上の利用規約ボタンの修正（スマホでの被り防止） --- */
+@media (max-width: 480px) {
+    .modal-trigger-btn {
+        top: 10px;
+        left: 10px;
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+}
+
+
+
+        
+
+        /* 左上配置の規約表示ボタン */
+        .modal-trigger-btn {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 5px 5px 5px 5px;
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .modal-trigger-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #00adb5;
+            box-shadow: 0 0 10px rgba(0, 173, 181, 0.3);
+        }
+
+        
+        h2 {
+            margin-bottom: 10px;
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+
+        .notice-badge {
+            background-color: #ff4757;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 25px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        /* パスワード用の相対位置コンテナ */
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+
+        /* ボタンと被らないようにパスワード入力欄の右側に余白を持たせる */
+        .password-wrapper input {
+            padding-right: 45px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #00adb5;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* トグルボタンのスタイル */
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+            user-select: none;
+        }
+
+        .toggle-password:hover {
+            color: #00adb5;
+        }
+
+        /* エラーメッセージ用のスタイル */
+        .error-message {
+            color: #ff4757;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none; /* 初期状態は非表示 */
+            font-weight: bold;
+        }
+
+        .fee-info {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px dashed #ff4757;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #ff6b81;
+            margin-bottom: 25px;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, #00adb5, #007880);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .login-btn:hover {
+            filter: brightness(1.2);
+            box-shadow: 0 0 15px rgba(0, 173, 181, 0.4);
+        }
+
+        /* ローディング状態のボタンスタイル */
+        .login-btn:disabled {
+            background: #555;
+            color: #aaa;
+            cursor: not-allowed;
+            box-shadow: none;
+            filter: none;
+        }
+
+        .footer-text {
+            margin-top: 20px;
+            font-size: 11px;
+            color: #666;
+        }
+
+        /* --- モーダルウィンドウのスタイル --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.is-active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: #222235;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 90%;
+            max-width: 750px;
+            height: 80vh;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            color: #e0e0e0;
+        }
+
+        .modal-overlay.is-active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            margin: 0;
+            font-size: 20px;
+            color: #00adb5;
+            font-weight: bold;
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 28px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            transition: color 0.2s;
+        }
+
+        .modal-close-btn:hover {
+            color: #ff4757;
+        }
+
+        .modal-body {
+            padding: 30px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.7;
+            text-align: left;
+        }
+
+        /* モーダル内の規約・特商法スタイル調整 */
+        .modal-body h2 {
+            font-size: 18px;
+            color: #fff;
+            border-left: 4px solid #00adb5;
+            padding-left: 12px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            text-align: left;
+            letter-spacing: 0;
+        }
+
+        .modal-body h3 {
+            font-size: 15px;
+            color: #00adb5;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .intro-text {
+            color: #bbb;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .modal-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .modal-body th, .modal-body td {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 15px;
+        }
+
+        .modal-body th {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            width: 30%;
+            font-weight: bold;
+        }
+
+        .modal-body td {
+            color: #ccc;
+        }
+
+        .modal-body td a {
+            color: #00adb5;
+            text-decoration: none;
+        }
+        
+        .modal-body td a:hover {
+            text-decoration: underline;
+        }
+
+        .modal-body ol, .modal-body ul {
+            margin: 0 0 20px 0;
+            padding-left: 20px;
+        }
+
+        .modal-body li {
+            margin-bottom: 8px;
+        }
+
+        .nested-list {
+            list-style-type: disc;
+            margin-top: 8px !important;
+        }
+
+        .terms-text {
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+
+        .modal-footer {
+            padding: 15px 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+
+
+    </style>
+</head>
+<body>
+
+<button class="modal-trigger-btn" onclick="openModal()">利用規約<br>特定商取引法</button>
+
+
+
+
+
+<!-- ログイン画面 -->
+<div class="login-container">
+    <h2>ログイン</h2>
+
+    <div class="notice-badge">
+        ※初回ログイン時のみ、初期費用500円（税込）の決済が必要です。
+    </div>
+
+    <form id="loginForm" onsubmit="handleSubmit(event)">
+        <div class="input-group">
+            <label for="username">
+                ユーザー名 / メールアドレス
+            </label>
+
+            <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="example@domain.com"
+                autocomplete="username"
+                required
+            >
+
+            <div
+                id="usernameError"
+                class="error-message"
+                role="alert"
+                aria-live="polite"
+            ></div>
+        </div>
+
+        <div class="input-group">
+            <label for="password">パスワード</label>
+
+            <div class="password-wrapper">
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="パスワードを入力"
+                    autocomplete="current-password"
+                    required
+                >
+
+                <button
+                    type="button"
+                    class="toggle-password"
+                    id="togglePassword"
+                    onclick="togglePasswordVisibility()"
+                    aria-label="パスワードを表示"
+                    aria-pressed="false"
+                >
+                    👁️
+                </button>
+            </div>
+
+            <div
+                id="passwordError"
+                class="error-message"
+                role="alert"
+                aria-live="polite"
+            ></div>
+        </div>
+
+        <div class="fee-info">
+            <strong>【ご案内】</strong><br>
+            初回ログイン完了後、お支払い画面へ移動します。
+        </div>
+
+        <button
+            type="submit"
+            id="submitBtn"
+            class="login-btn"
+        >
+            次へ進む
+        </button>
+    </form>
+
+    <div class="footer-text">
+        ※2回目以降のログインに費用はかかりません。
+    </div>
+
+    <button
+        type="button"
+        class="modal-trigger-btn"
+        onclick="openModal()"
+    >
+        利用規約<br>
+        特定商取引法
+    </button>
+</div>
+
+<script>
+function togglePasswordVisibility() {
+    const passwordInput = document.getElementById("password");
+    const toggleButton = document.getElementById("togglePassword");
+
+    if (!passwordInput || !toggleButton) return;
+
+    const isHidden = passwordInput.type === "password";
+
+    passwordInput.type = isHidden ? "text" : "password";
+
+    toggleButton.setAttribute(
+        "aria-label",
+        isHidden ? "パスワードを非表示" : "パスワードを表示"
+    );
+
+    toggleButton.setAttribute(
+        "aria-pressed",
+        String(isHidden)
+    );
+}
+</script>
+
+
+
+
+
+
+
+
+<div class="privacy-policy">
+
+    <h1>プライバシーポリシー</h1>
+
+    <p>
+        本プライバシーポリシーは、アプリ「Mew World」
+        （以下「本アプリ」といいます）における、
+        ユーザーの個人情報および関連データの取り扱いについて定めるものです。
+    </p>
+
+    <section>
+        <h2>第1条（アプリ名および開発者情報）</h2>
+
+        <div class="info-box">
+            <p><strong>アプリ名：</strong>Mew World</p>
+            <p><strong>開発者名：</strong>たろミュウゾー</p>
+            <p>
+                <strong>お問い合わせ先：</strong>
+                <a href="mailto:taromyuuzo@gmail.com">
+                    taromyuuzo@gmail.com
+                </a>
+            </p>
+        </div>
+    </section>
+
+    <section>
+        <h2>第2条（取得する情報）</h2>
+
+        <p>
+            本アプリでは、サービスおよび機能の提供に必要な範囲で、
+            以下の情報を取得する場合があります。
+        </p>
+
+        <ul>
+            <li>ユーザーが入力または送信した情報</li>
+            <li>アカウントの登録および認証に必要な情報</li>
+            <li>GPS等を利用して取得する位置情報</li>
+            <li>端末、OSおよびアプリの利用に関する情報</li>
+            <li>エラー情報、アクセス記録その他の動作情報</li>
+            <li>お問い合わせの際にユーザーから提供された情報</li>
+            <li>決済処理や利用状況の確認に必要な情報</li>
+        </ul>
+
+        <p>
+            実際に取得する情報は、本アプリの機能、利用状況、
+            端末の設定およびユーザーの許可によって異なります。
+        </p>
+
+        <p>
+            位置情報など、端末の権限を必要とする情報については、
+            必要な許可を得たうえで利用します。
+        </p>
+
+        <p>
+            本アプリで取得していない情報を、
+            取得しているものとして取り扱うことはありません。
+        </p>
+    </section>
+
+    <section>
+        <h2>第3条（情報の利用目的）</h2>
+
+        <p>
+            取得した情報は、以下の目的で利用します。
+        </p>
+
+        <ul>
+            <li>本アプリおよび関連サービスの提供</li>
+            <li>ユーザーの本人確認およびアカウント管理</li>
+            <li>位置情報を利用する機能の提供</li>
+            <li>利用料金の決済および支払い状況の確認</li>
+            <li>お問い合わせやサポートへの対応</li>
+            <li>不正利用の防止およびセキュリティの確保</li>
+            <li>不具合の調査、修正およびサービスの品質向上</li>
+            <li>法令上必要な対応</li>
+        </ul>
+
+        <p>
+            取得した情報は、利用目的の達成に必要な範囲で取り扱います。
+            利用目的を変更する場合は、法令に従って適切に対応します。
+        </p>
+    </section>
+
+    <section>
+        <h2>第4条（位置情報の取り扱い）</h2>
+
+        <p>
+            本アプリでは、位置情報を利用する機能を提供する場合があります。
+        </p>
+
+        <p>
+            位置情報は、当該機能の提供など、必要な目的のために利用します。
+            位置情報へのアクセスは、端末の設定やユーザーの許可状況に
+            応じて制限されます。
+        </p>
+
+        <p>
+            ユーザーは、端末の設定から位置情報の利用許可を変更できます。
+            ただし、許可を無効にした場合、一部の機能が利用できなくなる
+            ことがあります。
+        </p>
+
+        <p>
+            位置情報を保存する場合や外部サービスへ送信する場合は、
+            実際の機能およびデータの取り扱いに応じて適切に対応します。
+        </p>
+    </section>
+
+    <section>
+        <h2>第5条（第三者への提供および外部サービス）</h2>
+
+        <p>
+            本アプリでは、法令に基づく場合などを除き、
+            個人情報を本人の同意なく第三者に提供しないよう、
+            法令に従って適切に取り扱います。
+        </p>
+
+        <p>
+            ただし、本アプリの機能を提供するため、
+            認証、データ保存、決済、分析その他の外部サービスを
+            利用する場合があります。
+        </p>
+
+        <p>
+            外部サービスを利用する場合、サービスの提供に必要な情報が
+            当該事業者に送信されることがあります。
+            その場合は、利用するサービスの内容やデータの取り扱いに応じて、
+            必要な情報の開示および適切な管理に努めます。
+        </p>
+
+        <p>
+            外部サービスの利用状況や提供先については、
+            実際の実装に合わせて本ポリシーまたは関連ページに記載します。
+        </p>
+    </section>
+
+    <section>
+        <h2>第6条（情報の安全管理）</h2>
+
+        <p>
+            取得した情報について、不正アクセス、漏えい、紛失、
+            改ざんなどを防止するため、情報の種類や利用状況に応じた
+            適切な安全管理措置を講じるよう努めます。
+        </p>
+
+        <p>
+            また、情報を取り扱う外部サービスについても、
+            サービスの内容や契約条件などを確認し、適切な管理に努めます。
+        </p>
+    </section>
+
+    <section>
+        <h2>第7条（情報の保存および削除）</h2>
+
+        <p>
+            取得した情報は、利用目的の達成に必要な期間保存します。
+        </p>
+
+        <p>
+            保存する必要がなくなった情報については、
+            法令上保存が必要な場合などを除き、
+            適切な方法で削除するよう努めます。
+        </p>
+
+        <p>
+            ユーザーが自身の情報の確認、訂正または削除を希望する場合は、
+            下記のお問い合わせ先までご連絡ください。
+        </p>
+
+        <p>
+            なお、削除の対象や方法については、
+            法令上の義務、本人確認の必要性および利用する外部サービスの
+            仕様などに応じて対応します。
+        </p>
+    </section>
+
+    <section>
+        <h2>第8条（ユーザーの責任）</h2>
+
+        <p>
+            ユーザーは、本アプリを利用するにあたり、
+            他人の個人情報やプライバシーを不当に侵害しないものとします。
+        </p>
+
+        <p>
+            また、第三者の情報を本アプリに入力または送信する場合は、
+            法令および本アプリの利用規約を遵守するものとします。
+        </p>
+    </section>
+
+    <section>
+        <h2>第9条（プライバシーポリシーの変更）</h2>
+
+        <p>
+            本ポリシーは、法令の改正、本アプリの機能変更、
+            外部サービスの変更などに応じて改定する場合があります。
+        </p>
+
+        <p>
+            変更後のプライバシーポリシーは、本アプリまたは
+            本アプリに関連するウェブページに掲載します。
+            重要な変更については、必要に応じて適切な方法でお知らせします。
+        </p>
+    </section>
+
+    <section>
+        <h2>第10条（お問い合わせ先）</h2>
+
+        <div class="info-box">
+            <p>
+                本アプリにおける個人情報およびデータの取り扱いに関する
+                お問い合わせは、以下までご連絡ください。
+            </p>
+
+            <p><strong>開発者名：</strong>たろミュウゾー</p>
+
+            <p>
+                <strong>メールアドレス：</strong>
+                <a href="mailto:taromyuuzo@gmail.com">
+                    taromyuuzo@gmail.com
+                </a>
+            </p>
+        </div>
+    </section>
+
+</div>
+
+
+
+
+
+
+
+<h2>特定商取引法に基づく表記</h2>
+
+<table class="commerce-table">
+    <tbody>
+        <tr>
+            <th>販売事業者名</th>
+            <td>たろミュウゾー</td>
+        </tr>
+
+        <tr>
+            <th>運営統括責任者</th>
+            <td>たろミュウゾー</td>
+        </tr>
+
+        <tr>
+            <th>所在地</th>
+            <td>
+                請求があった場合、遅滞なく開示いたします。
+            </td>
+        </tr>
+
+        <tr>
+            <th>電話番号</th>
+            <td>
+                請求があった場合、遅滞なく開示いたします。
+            </td>
+        </tr>
+
+        <tr>
+            <th>メールアドレス</th>
+            <td>
+                <a href="mailto:taromyuuzo@gmail.com">
+                    taromyuuzo@gmail.com
+                </a>
+            </td>
+        </tr>
+
+        <tr>
+            <th>販売価格</th>
+            <td>
+                初回ログイン時の初期費用：500円（税込）。<br>
+                その他の有料サービスについては、
+                各サービスの購入画面に表示する価格をご確認ください。
+            </td>
+        </tr>
+
+        <tr>
+            <th>商品代金以外の必要料金</th>
+            <td>
+                インターネット接続料金、通信料金等は、
+                ユーザーの負担となります。<br>
+                その他の手数料が発生する場合は、
+                購入手続きの際に表示します。
+            </td>
+        </tr>
+
+        <tr>
+            <th>支払方法</th>
+            <td>
+                実際に利用可能な決済方法を購入画面に表示します。
+            </td>
+        </tr>
+
+        <tr>
+            <th>支払時期</th>
+            <td>
+                初回ログイン後の決済手続きにおいて、
+                購入画面に表示する条件に従いお支払いいただきます。
+            </td>
+        </tr>
+
+        <tr>
+            <th>サービス提供時期</th>
+            <td>
+                決済完了後、サービスの利用に必要な処理が完了次第、
+                ご利用いただけます。
+            </td>
+        </tr>
+
+        <tr>
+            <th>販売数量・利用条件</th>
+            <td>
+                各サービスの購入画面および利用規約に表示する条件に従います。
+            </td>
+        </tr>
+
+        <tr>
+            <th>返品・キャンセル・返金について</th>
+            <td>
+                <strong>＜お客様都合の場合＞</strong><br>
+                デジタルサービスの性質上、サービス提供開始後の
+                お客様都合によるキャンセルおよび返金は、
+                法令上必要な場合などを除き、お受けできない場合があります。<br><br>
+
+                <strong>＜サービスに不具合がある場合＞</strong><br>
+                サービスを正常に利用できない場合は、
+                下記のお問い合わせ先までご連絡ください。
+                状況を確認のうえ、法令およびサービスの利用条件に従って
+                対応いたします。<br><br>
+
+                <strong>＜お問い合わせ先＞</strong><br>
+                メールアドレス：
+                <a href="mailto:taromyuuzo@gmail.com">
+                    taromyuuzo@gmail.com
+                </a>
+            </td>
+        </tr>
+
+        <tr>
+            <th>継続課金について</th>
+            <td>
+                継続課金が発生するサービスを提供する場合は、
+                料金、課金周期、解約方法などを購入画面に明示します。
+                継続課金がない場合は、この項目を実際のサービス内容に合わせて
+                削除または修正してください。
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+
+
+
+
+
+<h2>サービス利用規約</h2>
+
+<p class="terms-text">
+    この利用規約（以下「本規約」といいます）は、
+    たろミュウゾー（以下「運営者」といいます）が提供する
+    アプリ「Mew World」および関連サービス
+    （以下「本サービス」といいます）の利用条件を定めるものです。
+    ユーザーは、本規約に同意したうえで本サービスを利用するものとします。
+</p>
+
+<h3>第1条（適用）</h3>
+<ol>
+    <li>
+        本規約は、ユーザーと運営者との間の本サービスの利用に関する
+        一切の関係に適用されます。
+    </li>
+    <li>
+        運営者は、本規約のほか、本サービスに関する個別規定や
+        ガイドライン等を定めることがあります。
+    </li>
+    <li>
+        個別規定と本規約の内容が異なる場合は、
+        法令に反しない範囲で、当該個別規定が優先されます。
+    </li>
+</ol>
+
+<h3>第2条（利用登録およびアカウント管理）</h3>
+<ol>
+    <li>
+        ユーザーは、運営者が定める方法に従って、
+        本サービスの利用登録およびログインを行うものとします。
+    </li>
+    <li>
+        ユーザーは、登録情報を正確かつ最新の状態に保つものとします。
+    </li>
+    <li>
+        ユーザーは、自身のアカウント情報を適切に管理し、
+        第三者による不正利用を防止するものとします。
+    </li>
+    <li>
+        アカウントの不正利用が疑われる場合は、
+        速やかに運営者へ連絡するものとします。
+    </li>
+</ol>
+
+<h3>第3条（利用料金および支払方法）</h3>
+<ol>
+    <li>
+        本サービスのダウンロードおよび一部機能の利用が無料である場合でも、
+        有料機能については別途料金が発生することがあります。
+    </li>
+    <li>
+        初回ログイン時には、初期費用として
+        500円（税込）の決済が必要となる場合があります。
+        決済の条件および対象者については、
+        購入画面に表示する内容に従うものとします。
+    </li>
+    <li>
+        初回ログイン時の決済以外に追加料金が発生する場合は、
+        対象サービス、料金および支払条件を、
+        購入手続きの前に確認できるよう表示します。
+    </li>
+    <li>
+        ユーザーは、購入画面に表示された支払条件を確認し、
+        運営者または運営者が指定する決済事業者が提供する
+        方法に従って料金を支払うものとします。
+    </li>
+    <li>
+        2回目以降のログインに追加料金が発生しない場合は、
+        その条件を購入画面などで明示します。
+        ただし、別途有料サービスを購入した場合は、
+        当該サービスの料金が発生することがあります。
+    </li>
+    <li>
+        決済が完了しない場合や決済に問題が生じた場合、
+        有料機能の利用を制限することがあります。
+    </li>
+</ol>
+
+<h3>第4条（禁止事項）</h3>
+<p class="terms-text">
+    ユーザーは、本サービスの利用にあたり、
+    以下の行為を行ってはならないものとします。
+</p>
+<ol>
+    <li>法令または公序良俗に違反する行為</li>
+    <li>犯罪行為または犯罪を助長する行為</li>
+    <li>運営者、他のユーザーまたは第三者の権利や利益を侵害する行為</li>
+    <li>他のユーザーの個人情報やプライバシーを不当に侵害する行為</li>
+    <li>本サービスを通じて取得した情報を、不正または無断で商業利用する行為</li>
+    <li>本サービスのサーバーやネットワークに過度な負荷をかける行為</li>
+    <li>不正アクセス、クラッキング、フィッシングその他のサイバー犯罪行為</li>
+    <li>不正な電波利用、通信妨害その他の通信を妨害する行為</li>
+    <li>決済情報、クレジットカード情報などを不正に利用する行為</li>
+    <li>本サービスの運営を妨害する行為</li>
+    <li>他のユーザーや第三者に対する嫌がらせ、脅迫、詐欺行為</li>
+    <li>児童の性的虐待・搾取に該当する行為やコンテンツの投稿、共有、勧誘</li>
+    <li>その他、法令、本規約または本サービスの目的に反する行為</li>
+</ol>
+
+<p class="terms-text">
+    運営者は、禁止事項への違反が確認された場合、
+    違反の内容や程度に応じて、投稿の削除、機能の制限、
+    アカウントの停止その他必要な措置を講じることがあります。
+</p>
+
+<h3>第5条（サービスの停止・変更・終了）</h3>
+<ol>
+    <li>
+        運営者は、以下のいずれかに該当する場合、
+        本サービスの全部または一部を停止または中断することがあります。
+        <ul class="nested-list">
+            <li>システムの保守点検または更新を行う場合</li>
+            <li>地震、火災、停電、災害などの不可抗力が発生した場合</li>
+            <li>通信回線やサーバーなどに障害が発生した場合</li>
+            <li>外部サービスの停止などにより提供が困難となった場合</li>
+            <li>その他、運営上または技術上必要と判断した場合</li>
+        </ul>
+    </li>
+    <li>
+        運営者は、緊急の場合を除き、
+        可能な範囲で事前にユーザーへお知らせするよう努めます。
+    </li>
+    <li>
+        運営者は、本サービスの内容を変更または終了する場合があります。
+        重要な変更や終了については、法令に従い適切に対応します。
+    </li>
+</ol>
+
+<h3>第6条（知的財産権）</h3>
+<ol>
+    <li>
+        本サービスおよび本サービスを通じて提供される文章、
+        画像、デザイン、プログラムその他のコンテンツに関する
+        知的財産権は、運営者または正当な権利を有する第三者に帰属します。
+    </li>
+    <li>
+        ユーザーは、法令で認められる場合を除き、
+        権利者の許可なく、これらのコンテンツを複製、
+        改変、配布、販売、公衆送信などに利用してはなりません。
+    </li>
+    <li>
+        ユーザーが本サービスに投稿または送信した情報については、
+        当該ユーザーまたは正当な権利者が権利を保持します。
+        ただし、本サービスの提供や運営に必要な範囲での取り扱いについては、
+        別途適用される条件に従うものとします。
+    </li>
+</ol>
+
+<h3>第7条（免責事項）</h3>
+<ol>
+    <li>
+        運営者は、本サービスについて、可能な限り正確かつ安定した
+        提供に努めますが、常に完全であること、
+        エラーがないこと、またはすべての端末で動作することを
+        保証するものではありません。
+    </li>
+    <li>
+        運営者は、本サービスの利用に関連してユーザーに損害が
+        発生した場合、運営者の故意または過失による場合を含め、
+        法令上認められる範囲で責任を負うものとします。
+    </li>
+    <li>
+        本規約のいかなる規定も、運営者の故意または重過失による責任、
+        その他法令上免責が認められない責任を
+        排除または制限するものではありません。
+    </li>
+    <li>
+        ユーザー間またはユーザーと第三者との間で紛争が生じた場合、
+        運営者は法令上必要な対応を行い、
+        状況に応じて適切な解決に努めます。
+    </li>
+</ol>
+
+<h3>第8条（利用制限および登録解除）</h3>
+<ol>
+    <li>
+        ユーザーが本規約に違反した場合、
+        または不正利用のおそれがあると合理的に判断される場合、
+        運営者は必要に応じて利用制限などの措置を講じることがあります。
+    </li>
+    <li>
+        重大な違反や緊急性がある場合は、
+        事前の通知なく利用制限を行うことがあります。
+    </li>
+    <li>
+        アカウントの削除を希望するユーザーは、
+        本サービスに設けられた手続き、またはお問い合わせ窓口を通じて
+        申請することができます。
+    </li>
+    <li>
+        アカウントの削除後も、法令上保存が必要な情報などについては、
+        必要な期間保存することがあります。
+    </li>
+</ol>
+
+<h3>第9条（本規約の変更）</h3>
+<p class="terms-text">
+    運営者は、法令の改正、本サービスの変更その他必要がある場合、
+    法令に従って本規約を変更することがあります。
+    変更する場合は、変更内容および効力発生日を、
+    本サービスまたは関連ウェブページへの掲載など、
+    適切な方法で周知します。
+</p>
+
+<h3>第10条（個人情報の取り扱い）</h3>
+<p class="terms-text">
+    ユーザーの個人情報および関連データの取り扱いについては、
+    別途定める「プライバシーポリシー」に従うものとします。
+</p>
+
+<h3>第11条（準拠法および管轄裁判所）</h3>
+<ol>
+    <li>本規約は、日本法に準拠して解釈されます。</li>
+    <li>
+        本サービスに関して紛争が生じた場合は、
+        法令に従い、適切な管轄裁判所において解決するものとします。
+    </li>
+</ol>
+
+<h3>第12条（お問い合わせ）</h3>
+<p class="terms-text">
+    本規約または本サービスに関するお問い合わせは、
+    以下のメールアドレスまでご連絡ください。
+</p>
+
+<p>
+    <strong>開発者名：</strong>たろミュウゾー<br>
+    <strong>メールアドレス：</strong>
+    <a href="mailto:taromyuuzo@gmail.com">
+        taromyuuzo@gmail.com
+    </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>第13条（子どもの安全に関するポリシー）</h3>
+
+<p class="terms-text">
+    運営者は、アプリ「Mew World」の利用者、
+    特に子どもの安全と権利を尊重し、
+    安全に利用できる環境の維持に努めます。
+</p>
+
+<ol>
+    <li>
+        <strong>児童の性的虐待・搾取に関する禁止事項</strong><br>
+        本サービスでは、児童の性的虐待および搾取
+        （CSAE）、児童性的虐待コンテンツ（CSAM）に該当する
+        コンテンツの投稿、共有、要求、勧誘その他これらに関連する
+        一切の行為を禁止します。
+    </li>
+
+    <li>
+        <strong>禁止行為への対応</strong><br>
+        本規約や関連ポリシーに違反する行為が確認された場合、
+        運営者は違反の内容や程度に応じて、
+        コンテンツの削除、アカウントの利用制限または停止など、
+        必要な措置を講じます。
+        また、法令に基づき必要な場合には、
+        関係機関への通報など適切な対応を行います。
+    </li>
+
+    <li>
+        <strong>通報および相談</strong><br>
+        ユーザーは、児童の安全を脅かす行為や
+        本ポリシーに違反するコンテンツを発見した場合、
+        以下のお問い合わせ窓口を通じて報告できます。
+        アプリ内に通報機能がある場合は、
+        その機能を利用することもできます。
+    </li>
+
+    <li>
+        <strong>報告への対応</strong><br>
+        運営者は、受け付けた報告の内容を確認し、
+        必要に応じて適切な措置を講じるよう努めます。
+        対応にあたっては、関係法令および
+        ユーザーの安全に配慮します。
+    </li>
+
+    <li>
+        <strong>お問い合わせ窓口</strong><br>
+        子どもの安全に関するご相談や違反行為の報告は、
+        以下のメールアドレスまでご連絡ください。
+        <div class="info-box">
+            <p>
+                <strong>担当：</strong>子どもの安全対策担当
+            </p>
+            <p>
+                <strong>開発者名：</strong>たろミュウゾー
+            </p>
+            <p>
+                <strong>メールアドレス：</strong>
+                <a href="mailto:taromyuuzo@gmail.com">
+                    taromyuuzo@gmail.com
+                </a>
+            </p>
+        </div>
+    </li>
+</ol>
+
+
+
+
+
+
+
+  
+
+
+
+        <div class="modal-footer">
+            &copy; 2024 <strong>リンクリンカーくん</strong> All Rights Reserved.
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- 設定項目 ---
+    const config = {
+        // ここにお手持ちの決済リンク（StripeやPayPalなどのURL）を入力してください
+        paymentUrl: 'https://example.com/your-payment-link' 
+    };
+
+    // 入力禁止ワード（NGワード）のリスト
+    const forbiddenWords = [
+        'ソフトバンク',
+        'LINE',
+        '中部電力ミライズ',
+        '郵便局',
+        'Panasonic',
+        'SunWave',
+        'パナソニック',
+        'コメダ珈琲',
+        '株式会社コーナン',
+        '電気',
+        '電力',
+        '解体業',
+        '0',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        'エアコン',
+        '冷凍庫',
+        'クーラー',
+        'アライフーズ',
+        '株式会社アライフーズ',
+        'ラーメン福',
+        'カメラ',
+        'コン',
+        '室外機',
+        'Panasonic',
+        'パナソニック',
+        'PANASONIC',
+        '光',
+        'ヒカリ',
+        'ひかり',
+        '波',
+        '電波',
+        '周波数',
+        'Sunwave',
+        'サンウェーブ',
+        'さんうぇーぶ',
+        'スマートフォン',
+        'スマホ',
+        'ユアサ商事',
+        '株式会社YUASA',
+        'https://www.yuasa.co.jp/',
+        'ユアサ',
+        '株式会社ユアサ',
+        'INDEED',
+        'indeed',
+        'インディード',
+        'いんでぃーど',
+        'https://jp.indeed.com/m/',
+    'Indeed',
+    'レペゼン地球',
+    'Repezen Foxx',
+    'Candy Foxx',
+    'DJ社長',
+    '木元 駿之介',
+    'DJ脇',
+    '脇 将人',
+    'DJ銀太',
+    '内田 銀太',
+    'DJマル',
+    '松尾 竜之介',
+    'MG 脇',
+    'チバニャン',
+    '建築家',
+    'フォックス',
+    'DJふぉい',
+    'Candy',
+    'Foxx',
+        '清水建設',
+        '警察',
+        'エンジニア',
+        'ポールトゥウィン',
+    ];
+
+    // ログイン処理
+
+
+
+
+
+    
+
+function handleSubmit(event) {
+    event.preventDefault();
+
+    // 各種要素の取得
+    const usernameInput = document.getElementById('username').value.trim();
+    const errorElement = document.getElementById('usernameError');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // いったんエラー表示をクリアする
+    errorElement.textContent = '';
+    errorElement.style.display = 'none';
+
+
+if (usernameInput === '反社スレイヤー') {
+    // 反社スレイヤー用ページ
+    window.location.href = "ニューワールド.html";
+    return;
+}
+
+if (usernameInput === 'Test') {
+    // Test用ページ
+    window.location.href = "Test.html";
+    return;
+        }
+
+    
+    // ============================
+    // フリーパス（試運転用）
+    // ============================
+   // if (usernameInput === '反社スレイヤー') {
+        // ログイン成功後のページへ移動
+        // 必要に応じて変更してください。
+//      window.location.href = "ニューワールド.html";
+//        return;
+//   }
+
+    // 入力禁止ワードのチェック
+    const lowercaseInput = usernameInput.toLowerCase();
+    const foundWord = forbiddenWords.find(word =>
+        lowercaseInput.includes(word.toLowerCase())
+    );
+
+    if (foundWord) {
+        errorElement.textContent =
+            `ユーザー名に利用できないワード（${foundWord}）が含まれています。ログインできません。`;
+        errorElement.style.display = 'block';
+        return;
+    }
+
+    // 禁止ワードがない場合、多重クリック防止のためにボタンを無効化
+    submitBtn.disabled = true;
+    submitBtn.textContent = '決済画面へ移動中...';
+
+    // 決済ページへ移動
+    window.location.href = config.paymentUrl;
+}
+
+
+
+
+
+
+
+
+
+
+    
+
+
+    
+    
+    // パスワードの表示/非表示切り替え処理
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('password');
+        const toggleButton = document.getElementById('togglePassword');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleButton.textContent = '🙈';
+        } else {
+            passwordInput.type = 'password';
+            toggleButton.textContent = '👁️';
+        }
+    }
+
+    // モーダルを開く
+    function openModal() {
+        document.getElementById('termsModal').classList.add('is-active');
+    }
+
+    // モーダルを閉じる
+    function closeModal() {
+        document.getElementById('termsModal').classList.remove('is-active');
+    }
+
+    // モーダルの外側（背景）をクリックしたときも閉じるようにする
+    function closeModalOutside(event) {
+        if (event.target.id === 'termsModal') {
+            closeModal();
+        }
+    }
+</script>
+
+</body>
+</html>
+
+
+
+
