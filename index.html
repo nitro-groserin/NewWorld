@@ -1958,22 +1958,8 @@ if (usernameInput === 'Test') {
         }
     }
 
-    // モーダルを開く
-    function openModal() {
-        document.getElementById('termsModal').classList.add('is-active');
-    }
 
-    // モーダルを閉じる
-    function closeModal() {
-        document.getElementById('termsModal').classList.remove('is-active');
-    }
-
-    // モーダルの外側（背景）をクリックしたときも閉じるようにする
-    function closeModalOutside(event) {
-        if (event.target.id === 'termsModal') {
-            closeModal();
-        }
-    }
+    
 </script>
 
 </body>
