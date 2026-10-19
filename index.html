@@ -1052,99 +1052,18 @@ if (usernameInput === 'Test') {
 
 
 
+
+
+    
+
+
+
+
+
         
-        <div class="modal-footer">
-            &copy; 2024 <strong>リンクリンカーくん</strong> All Rights Reserved.
-        </div>
-    </div>
-</div>
-
-<script>
-    // --- 設定項目 ---
-    const config = {
-        // ここにお手持ちの決済リンク（StripeやPayPalなどのURL）を入力してください
-        paymentUrl: 'https://example.com/your-payment-link' 
-    };
-
-    // 入力禁止ワード（NGワード）のリスト
-    const forbiddenWords = [
-        'ソフトバンク',
-        'LINE',
-        '中部電力ミライズ',
-        '郵便局',
-        'Panasonic',
-        'SunWave',
-        'パナソニック',
-        'コメダ珈琲',
-        'http://cubic-auto.jp/company/',
-        '有限会社キュービックオート',
-        '(有)キュービックオート',
-    ];
+       
 
 
-// ログイン処理
-    function handleSubmit(event) {
-        event.preventDefault();
-        
-        // 各種要素の取得
-        const usernameInput = document.getElementById('username').value;
-        const errorElement = document.getElementById('usernameError');
-        const submitBtn = document.getElementById('submitBtn');
-        
-        // いったんエラー表示をクリアする
-        errorElement.textContent = '';
-        errorElement.style.display = 'none';
-        
-        // 入力禁止ワードのチェック
-        const lowercaseInput = usernameInput.toLowerCase();
-        const foundWord = forbiddenWords.find(word => lowercaseInput.includes(word.toLowerCase()));
-
-        if (foundWord) {
-            // 禁止ワードが含まれていた場合、赤文字でエラー表示をして処理を中断
-            errorElement.textContent = `ユーザー名に利用できないワード（${foundWord}）が含まれています。ログインできません。`;
-            errorElement.style.display = 'block';
-            return; 
-        }
-
-        // 禁止ワードがない場合、多重クリック防止のためにボタンを無効化して決済ページへ遷移
-        submitBtn.disabled = true;
-        submitBtn.textContent = '決済画面へ移動中...';
-
-        // 決済リンクURLへリダイレクト
-        window.location.href = config.paymentUrl;
-    }
-
-    // パスワードの表示/非表示切り替え処理
-    function togglePasswordVisibility() {
-        const passwordInput = document.getElementById('password');
-        const toggleButton = document.getElementById('togglePassword');
-        
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            toggleButton.textContent = '🙈';
-        } else {
-            passwordInput.type = 'password';
-            toggleButton.textContent = '👁️';
-        }
-    }
-
-    // モーダルを開く
-    function openModal() {
-        document.getElementById('termsModal').classList.add('is-active');
-    }
-
-    // モーダルを閉じる
-    function closeModal() {
-        document.getElementById('termsModal').classList.remove('is-active');
-    }
-
-    // モーダルの外側（背景）をクリックしたときも閉じるようにする
-    function closeModalOutside(event) {
-        if (event.target.id === 'termsModal') {
-            closeModal();
-        }
-    }
-</script>
 
 </body>
 </html>
