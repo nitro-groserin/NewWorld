@@ -415,212 +415,168 @@
 
 
 
+
 <!-- モーダル全体 -->
+
 <div class="modal-overlay" id="termsModal"
-     onclick="closeModalOutside(event)">
+onclick="closeModalOutside(event)">
 
-    <!-- モーダル本体 -->
-    <div class="modal-content">
+<!-- モーダル本体 -->
+<div class="modal-content">
 
-        <!-- ヘッダー -->
-        <div class="modal-header">
-            <h3 class="modal-title">サービス情報</h3>
-            <button type="button"
-                    class="modal-close-btn"
-                    onclick="closeModal()"
-                    aria-label="閉じる">
-                &times;
-            </button>
-        </div>
+    <!-- ヘッダー -->
+    <div class="modal-header">
+        <h3 class="modal-title">サービス情報</h3>
+        <button type="button"
+                class="modal-close-btn"
+                onclick="closeModal()"
+                aria-label="閉じる">
+            &times;
+        </button>
+    </div>
 
-        <!-- スクロール可能な本文 -->
-        <div class="modal-body">
+    <!-- スクロール可能な本文 -->
+    <div class="modal-body">
 
-            <section class="commerce-policy">
-                <!-- 特定商取引法に基づく表記を1つだけ配置 -->
-            </section>
+        <!-- 目次・リンク -->
+        <nav class="service-info-nav" aria-label="サービス情報メニュー">
+            <h2>目次</h2>
+            <ul>
+                <li>
+                    <a href="#commerce"
+                       onclick="scrollToSection(event, 'commerce')">
+                        特定商取引法に基づく表記
+                    </a>
+                </li>
+                <li>
+                    <a href="#terms"
+                       onclick="scrollToSection(event, 'terms')">
+                        サービス利用規約
+                    </a>
+                </li>
+                <li>
+                    <a href="#privacy"
+                       onclick="scrollToSection(event, 'privacy')">
+                        プライバシーポリシー
+                    </a>
+                </li>
+                <li>
+                    <a href="#safety"
+                       onclick="scrollToSection(event, 'safety')">
+                        子どもの安全に関するポリシー
+                    </a>
+                </li>
+            </ul>
+        </nav>
 
-            <section class="service-terms">
-                <!-- サービス利用規約を1つだけ配置 -->
-            </section>
+        <!-- 特定商取引法に基づく表記 -->
+        <section class="commerce-policy" id="commerce">
+            <!-- ここに特定商取引法に基づく表記の本文を配置 -->
+        </section>
 
-            <section class="privacy-policy">
-                <!-- プライバシーポリシーを1つだけ配置 -->
-            </section>
+        <!-- サービス利用規約 -->
+        <section class="service-terms" id="terms">
+            <!-- ここにサービス利用規約の本文を配置 -->
+        </section>
 
-            <section class="child-safety-policy">
-                <!-- 子どもの安全に関するポリシーを配置 -->
-            </section>
+        <!-- プライバシーポリシー -->
+        <section class="privacy-policy" id="privacy">
+            <!-- ここにプライバシーポリシーの本文を配置 -->
+        </section>
 
-        </div>
-        <!-- modal-body 終了 -->
+        <!-- 子どもの安全に関するポリシー -->
+        <section class="child-safety-policy" id="safety">
+            <!-- ここに子どもの安全に関するポリシーの本文を配置 -->
+        </section>
 
     </div>
-    <!-- modal-content 終了 -->
+    <!-- modal-body 終了 -->
 
 </div>
-<!-- modal-overlay 終了 -->
+<!-- modal-content 終了 -->
 
 
+</div>
+<!-- モーダル全体 終了 -->
+
+<script>
+function scrollToSection(event, sectionId) {
+event.preventDefault();
+
+const modalBody = document.querySelector(
+'#termsModal .modal-body'
+);
+
+const target = document.getElementById(sectionId);
+
+if (modalBody && target) {
+const bodyRect = modalBody.getBoundingClientRect();
+const targetRect = target.getBoundingClientRect();
+
+modalBody.scrollTo({
+top: modalBody.scrollTop
++ targetRect.top
+- bodyRect.top,
+behavior: 'smooth'
+});
+}
+}
+</script>
 
 <style>
-
-/* モーダルの背景 */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    background: rgba(0, 0, 0, 0.6);
-    box-sizing: border-box;
+/* 目次 */
+.service-info-nav {
+margin: 16px 0 28px;
+padding: 16px;
+background: #f7f7f7;
+border: 1px solid #ddd;
+border-radius: 8px;
 }
 
-/* モーダル表示時 */
-.modal-overlay.active {
-    display: flex;
+.service-info-nav h2 {
+margin-top: 0;
+font-size: 18px;
 }
 
-/* モーダル本体 */
-.modal-content {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 800px;
-    max-height: 90vh;
-    max-height: 90dvh;
-    overflow: hidden;
-    background: #fff;
-    border-radius: 12px;
-    box-sizing: border-box;
+.service-info-nav ul {
+padding-left: 22px;
+margin-bottom: 0;
 }
 
-/* 固定ヘッダー */
-.modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-    gap: 12px;
-    padding: 16px 20px;
-    border-bottom: 1px solid #ddd;
-    background: #fff;
+.service-info-nav li {
+margin: 10px 0;
 }
 
-.modal-title {
-    margin: 0;
-    font-size: 18px;
+.service-info-nav a {
+color: #1769aa;
+text-decoration: underline;
+overflow-wrap: anywhere;
 }
 
-.modal-close-btn {
-    flex-shrink: 0;
-    border: none;
-    background: transparent;
-    font-size: 30px;
-    line-height: 1;
-    cursor: pointer;
+/* 各セクション */
+.commerce-policy,
+.service-terms,
+.privacy-policy,
+.child-safety-policy {
+margin-top: 28px;
+line-height: 1.8;
+overflow-wrap: anywhere;
 }
 
-/* 本文だけスクロール */
-.modal-body {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding: 20px;
-    line-height: 1.8;
-    overflow-wrap: anywhere;
-    box-sizing: border-box;
+/* リンク先へ移動したときの余白 */
+.commerce-policy,
+.service-terms,
+.privacy-policy,
+.child-safety-policy {
+scroll-margin-top: 12px;
 }
-
-/* セクションの間隔 */
-.modal-body section {
-    display: block;
-    margin: 0 0 32px;
-}
-
-.modal-body h1,
-.modal-body h2 {
-    line-height: 1.5;
-    margin-top: 28px;
-    margin-bottom: 16px;
-}
-
-.modal-body h3 {
-    margin-top: 24px;
-    margin-bottom: 12px;
-}
-
-.modal-body p {
-    margin: 12px 0;
-}
-
-.modal-body table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-.modal-body th,
-.modal-body td {
-    padding: 10px;
-    border: 1px solid #ddd;
-    text-align: left;
-    vertical-align: top;
-    overflow-wrap: anywhere;
-}
-
-.modal-body th {
-    width: 34%;
-    background: #f5f5f5;
-}
-
-.modal-body img,
-.modal-body iframe {
-    max-width: 100%;
-}
-
-.modal-body a {
-    overflow-wrap: anywhere;
-}
-
-/* スマートフォン */
-@media (max-width: 600px) {
-    .modal-overlay {
-        padding: 8px;
-    }
-
-    .modal-content {
-        max-height: 94vh;
-        max-height: 94dvh;
-        border-radius: 10px;
-    }
-
-    .modal-header {
-        padding: 12px 16px;
-    }
-
-    .modal-body {
-        padding: 14px;
-        font-size: 14px;
-    }
-
-    .modal-body th,
-    .modal-body td {
-        padding: 8px;
-        font-size: 12px;
-    }
-
-    .modal-body th {
-        width: 36%;
-    }
-}
-    </style>
+</style>
 
 
 
+    
+
+    
 
 
 <script>
@@ -649,23 +605,6 @@ function openModal() {
 
 
 </script>
-
-
-
-
-
-
-    
-
-<div class="modal-overlay" id="termsModal" onclick="closeModalOutside(event)">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 class="modal-title">サービス情報</h3>
-            <button class="modal-close-btn" onclick="closeModal()">&times;</button>
-        </div>
-        
-        <div class="modal-body">
-
 
 
           
